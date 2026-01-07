@@ -8,36 +8,52 @@ export function Menu({ isOpen, onClose }) {
   const navigate = useNavigate()
   const { signOut } = useAuth()
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false)
+  const [isClosing, setIsClosing] = useState(false)
 
   const handleNavigate = (path) => {
     onClose()
     navigate(path)
   }
 
+  const handleLogoutClick = () => {
+    setIsClosing(true)
+    setShowLogoutConfirm(true)
+  }
+
   const handleLogout = async () => {
     await signOut()
     setShowLogoutConfirm(false)
+    setIsClosing(false)
     navigate(ROUTES.START)
   }
 
-  if (!isOpen) return null
+  const handleCancelLogout = () => {
+    setShowLogoutConfirm(false)
+    setIsClosing(false)
+  }
+
+  if (!isOpen && !showLogoutConfirm) return null
 
   return (
     <>
       {/* Overlay - schließt Menü bei Klick, aber nicht über Header-Bereich */}
       <div 
-        className="fixed inset-0 top-14 z-40 bg-black/60" 
-        onClick={onClose} 
+        className={`fixed inset-0 top-14 z-40 bg-black/60 transition-opacity duration-300 ${isClosing ? 'opacity-0' : 'opacity-100'}`}
+        onClick={showLogoutConfirm ? handleCancelLogout : onClose} 
       />
       
-      {/* Zentriertes Menü - 85% Bildschirmbreite, 15% Innenabstand zu Rändern */}
-      <nav className="fixed left-[7.5%] right-[7.5%] top-1/2 z-50 -translate-y-1/2 rounded-2xl bg-[var(--color-bg-secondary)] shadow-xl border border-[var(--color-border)] p-[6%]">
+      {/* Zentriertes Menü */}
+      <nav 
+        className={`fixed left-[7.5%] right-[7.5%] top-1/2 z-50 -translate-y-1/2 rounded-2xl bg-[var(--color-bg-secondary)] shadow-xl border border-[var(--color-border)] transition-opacity duration-300 ${isClosing ? 'opacity-0' : 'opacity-100'}`}
+        style={{ padding: '6%' }}
+      >
         <ul className="flex flex-col gap-4">
           {MENU_ITEMS.map((item) => (
             <li key={item.path}>
               <button
                 onClick={() => handleNavigate(item.path)}
-                className="w-full rounded-full bg-[var(--color-bg-tertiary)] px-8 py-5 text-left text-[var(--color-text-primary)] text-lg transition-colors hover:bg-[var(--color-border)]"
+                className="w-full rounded-full bg-[var(--color-bg-tertiary)] py-5 text-left text-[var(--color-text-primary)] text-lg transition-colors hover:bg-[var(--color-border)]"
+                style={{ paddingLeft: '8%', paddingRight: '8%' }}
               >
                 {item.label}
               </button>
@@ -45,8 +61,9 @@ export function Menu({ isOpen, onClose }) {
           ))}
           <li className="mt-3">
             <button
-              onClick={() => setShowLogoutConfirm(true)}
-              className="w-full rounded-full bg-[var(--color-bg-tertiary)] px-8 py-5 text-left text-[var(--color-text-primary)] text-lg transition-colors hover:bg-[var(--color-border)]"
+              onClick={handleLogoutClick}
+              className="w-full rounded-full bg-[var(--color-bg-tertiary)] py-5 text-left text-[var(--color-text-primary)] text-lg transition-colors hover:bg-[var(--color-border)]"
+              style={{ paddingLeft: '8%', paddingRight: '8%' }}
             >
               Abmelden
             </button>
@@ -56,7 +73,7 @@ export function Menu({ isOpen, onClose }) {
 
       <ConfirmDialog
         isOpen={showLogoutConfirm}
-        onClose={() => setShowLogoutConfirm(false)}
+        onClose={handleCancelLogout}
         onConfirm={handleLogout}
         title="Abmelden"
         confirmText="Bestätigen"

@@ -1,29 +1,24 @@
-import { useEffect } from 'react'
-
-export function Modal({ isOpen, onClose, children }) {
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden'
-    } else {
-      document.body.style.overflow = 'unset'
-    }
-    
-    return () => {
-      document.body.style.overflow = 'unset'
-    }
-  }, [isOpen])
-
+export function NotificationsPanel({ isOpen, onClose }) {
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <>
+      {/* Overlay - Klick außerhalb schließt */}
       <div 
-        className="absolute inset-0 bg-black/60" 
-        onClick={onClose}
+        className="fixed inset-0 top-14 z-40 bg-black/60 transition-opacity duration-300"
+        onClick={onClose} 
       />
-      <div className="relative z-10 rounded-2xl bg-[var(--color-bg-secondary)] shadow-xl border border-[var(--color-border)]">
-        {children}
+      
+      {/* Zentriertes Panel - gleiche Größe wie Menü */}
+      <div 
+        className="fixed left-[7.5%] right-[7.5%] top-1/2 z-50 -translate-y-1/2 rounded-2xl bg-[var(--color-bg-tertiary)] shadow-xl border border-[var(--color-border)] transition-opacity duration-300"
+        style={{ padding: '6%', minHeight: '200px' }}
+      >
+        {/* Inhalt leer - wird später befüllt */}
+        <p className="text-[var(--color-text-secondary)] text-center">
+          Keine neuen Benachrichtigungen
+        </p>
       </div>
-    </div>
+    </>
   )
 }

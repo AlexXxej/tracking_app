@@ -4,6 +4,7 @@ import { Menu } from '../components/navigation/Menu'
 import { MenuIcon } from '../components/navigation/MenuIcon'
 import { NewsIcon } from '../components/navigation/NewsIcon'
 import { BackButton } from '../components/navigation/BackButton'
+import { NotificationsPanel } from '../components/navigation/NotificationsPanel'
 import { ROUTES, MENU_ITEMS } from '../utils/constants'
 
 function getPageTitle(pathname) {
@@ -22,11 +23,16 @@ function getPageTitle(pathname) {
 
 export function AppLayout() {
   const [menuOpen, setMenuOpen] = useState(false)
+  const [notificationsOpen, setNotificationsOpen] = useState(false)
   const location = useLocation()
   
   const isMainPage = location.pathname === ROUTES.MAIN
   const showBackButton = !isMainPage
   const pageTitle = getPageTitle(location.pathname)
+
+  const handleNotificationsClick = () => {
+    setNotificationsOpen(true)
+  }
 
   return (
     <div className="flex h-full flex-col">
@@ -40,7 +46,7 @@ export function AppLayout() {
         </h1>
         
         <div className="flex w-24 items-center justify-end gap-1">
-          <NewsIcon hasNews={false} onClick={() => {}} />
+          <NewsIcon hasNews={false} onClick={handleNotificationsClick} />
           <MenuIcon onClick={() => setMenuOpen(true)} />
         </div>
       </header>
@@ -50,6 +56,7 @@ export function AppLayout() {
       </main>
 
       <Menu isOpen={menuOpen} onClose={() => setMenuOpen(false)} />
+      <NotificationsPanel isOpen={notificationsOpen} onClose={() => setNotificationsOpen(false)} />
     </div>
   )
 }

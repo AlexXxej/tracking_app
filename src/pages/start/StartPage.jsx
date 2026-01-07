@@ -1,7 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { useEffect } from 'react'
 import { useAuth } from '../../hooks/useAuth.jsx'
-import { Button } from '../../components/ui/Button'
 import { ROUTES } from '../../utils/constants'
 
 export function StartPage() {
@@ -14,6 +13,12 @@ export function StartPage() {
     }
   }, [isAuthenticated, loading, navigate])
 
+  const handleClick = () => {
+    if (!loading && !isAuthenticated) {
+      navigate(ROUTES.LOGIN)
+    }
+  }
+
   if (loading) {
     return (
       <div className="text-[var(--color-text-secondary)]">Laden...</div>
@@ -21,19 +26,13 @@ export function StartPage() {
   }
 
   return (
-    <div className="flex flex-col items-center gap-8 text-center">
-      <div>
-        <h1 className="mb-2 text-3xl font-bold text-[var(--color-text-primary)]">
-          Zeiterfassung
-        </h1>
-        <p className="text-[var(--color-text-secondary)]">
-          Arbeitszeiten einfach erfassen
-        </p>
-      </div>
-      
-      <Button onClick={() => navigate(ROUTES.LOGIN)}>
-        Anmelden
-      </Button>
+    <div 
+      className="flex h-full w-full items-center justify-center cursor-pointer"
+      onClick={handleClick}
+    >
+      <h1 className="text-4xl font-bold text-[var(--color-text-primary)]">
+        Tracking App
+      </h1>
     </div>
   )
 }

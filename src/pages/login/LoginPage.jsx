@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { auth } from '../../services/auth'
-import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
 import { ROUTES } from '../../utils/constants'
 
@@ -38,9 +37,13 @@ export function LoginPage() {
             Prüfe dein Postfach und klicke auf den Link.
           </p>
         </div>
-        <Button variant="secondary" onClick={() => navigate(ROUTES.START)}>
+        <button 
+          onClick={() => navigate(ROUTES.START)}
+          className="rounded-full bg-[var(--color-cancel)] py-4 text-center text-[var(--color-text-primary)] font-medium text-lg transition-colors hover:bg-[var(--color-cancel-hover)]"
+          style={{ paddingLeft: '8%', paddingRight: '8%' }}
+        >
           Zurück
-        </Button>
+        </button>
       </div>
     )
   }
@@ -69,14 +72,25 @@ export function LoginPage() {
           <p className="text-sm text-[var(--color-error)]">{error}</p>
         )}
 
-        <Button type="submit" disabled={loading || !email}>
-          {loading ? 'Senden...' : 'Magic Link senden'}
-        </Button>
+        <div className="flex gap-4">
+          <button 
+            type="submit" 
+            disabled={loading || !email}
+            className="flex-1 rounded-full bg-[var(--color-confirm)] py-4 text-center text-black font-medium text-lg transition-colors hover:bg-[var(--color-confirm-hover)] disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{ paddingLeft: '8%', paddingRight: '8%' }}
+          >
+            {loading ? 'Senden...' : 'Senden'}
+          </button>
+          <button 
+            type="button"
+            onClick={() => navigate(ROUTES.START)}
+            className="flex-1 rounded-full bg-[var(--color-cancel)] py-4 text-center text-[var(--color-text-primary)] font-medium text-lg transition-colors hover:bg-[var(--color-cancel-hover)]"
+            style={{ paddingLeft: '8%', paddingRight: '8%' }}
+          >
+            Abbrechen
+          </button>
+        </div>
       </form>
-
-      <Button variant="secondary" onClick={() => navigate(ROUTES.START)}>
-        Abbrechen
-      </Button>
     </div>
   )
 }
