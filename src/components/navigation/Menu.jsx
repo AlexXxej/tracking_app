@@ -24,14 +24,20 @@ export function Menu({ isOpen, onClose }) {
 
   return (
     <>
-      <div className="fixed inset-0 z-40" onClick={onClose} />
-      <nav className="fixed right-4 top-16 z-50 w-56 rounded-lg bg-[var(--color-bg-secondary)] shadow-xl border border-[var(--color-border)]">
+      {/* Overlay - schließt Menü bei Klick, aber nicht über Header-Bereich */}
+      <div 
+        className="fixed inset-0 top-14 z-40 bg-black/60" 
+        onClick={onClose} 
+      />
+      
+      {/* Zentriertes Menü */}
+      <nav className="fixed left-1/2 top-1/2 z-50 w-72 -translate-x-1/2 -translate-y-1/2 rounded-lg bg-[var(--color-bg-secondary)] shadow-xl border border-[var(--color-border)]">
         <ul className="py-2">
           {MENU_ITEMS.map((item) => (
             <li key={item.path}>
               <button
                 onClick={() => handleNavigate(item.path)}
-                className="w-full px-4 py-3 text-left text-[var(--color-text-primary)] transition-colors hover:bg-[var(--color-bg-tertiary)]"
+                className="w-full px-6 py-4 text-left text-[var(--color-text-primary)] transition-colors hover:bg-[var(--color-bg-tertiary)]"
               >
                 {item.label}
               </button>
@@ -40,7 +46,7 @@ export function Menu({ isOpen, onClose }) {
           <li className="border-t border-[var(--color-border)] mt-2 pt-2">
             <button
               onClick={() => setShowLogoutConfirm(true)}
-              className="w-full px-4 py-3 text-left text-[var(--color-error)] transition-colors hover:bg-[var(--color-bg-tertiary)]"
+              className="w-full px-6 py-4 text-left text-[var(--color-error)] transition-colors hover:bg-[var(--color-bg-tertiary)]"
             >
               Abmelden
             </button>
