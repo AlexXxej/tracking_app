@@ -8,24 +8,29 @@ export function CallbackPage() {
   const [error, setError] = useState('')
 
   useEffect(() => {
-    const handleCallback = async () => {
-      try {
-        const { error } = await supabase.auth.exchangeCodeForSession(
-          window.location.href
-        )
-        
-        if (error) {
-          setError(error.message)
-          return
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        if (event === 'SIGNED_IN' && session) {
+          navigate(ROUTES.MAIN, { replace: true })
         }
-
-        navigate(ROUTES.MAIN, { replace: true })
-      } catch (err) {
-        setError('Authentifizierung fehlgeschlagen')
+        if (event === 'SIGNED_OUT' || event === 'USER_DELETED') {
+          setError('Authentifizierung fehlgeschlagen')
+        }
       }
-    }
+    )
 
-    handleCallback()
+    // Check if already authenticated
+    supabase.auth.getSession().then(({ data: { session }, error }) => {
+      if (error) {
+        setError(error.message)
+        return
+      }
+      if (session) {
+        navigate(ROUTES.MAIN, { replace: true })
+      }
+    })
+
+    return () => subscription.unsubscribe()
   }, [navigate])
 
   if (error) {
