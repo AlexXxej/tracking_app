@@ -20,7 +20,7 @@ export function LoginPage() {
       await auth.sendMagicLink(email)
       setSent(true)
     } catch (err) {
-      setError(err.message || 'Ein Fehler ist aufgetreten')
+      setError(err.message || 'Ein Fehler ist aufgetreten!')
     } finally {
       setLoading(false)
     }
