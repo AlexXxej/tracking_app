@@ -21,7 +21,7 @@ export function Modal({ isOpen, onClose, children }) {
         className="absolute inset-0 bg-black/60" 
         onClick={onClose}
       />
-      <div className="relative z-10 w-full max-w-md rounded-lg bg-[var(--color-bg-secondary)] p-6 shadow-xl">
+      <div className="relative z-10 rounded-2xl bg-[var(--color-bg-secondary)] shadow-xl border border-[var(--color-border)]">
         {children}
       </div>
     </div>
