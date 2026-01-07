@@ -10,7 +10,7 @@ export function ConfirmDialog({
 }) {
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
-      <div className="w-[420px] px-12 py-10">
+      <div className="w-[85vw] max-w-[420px] p-[6%]">
         <div className="rounded-full bg-[var(--color-bg-tertiary)] px-8 py-5 mb-6 flex items-center justify-between">
           <span className="text-[var(--color-text-primary)] text-lg">{title}</span>
           <svg 

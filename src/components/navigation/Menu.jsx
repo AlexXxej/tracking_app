@@ -30,8 +30,8 @@ export function Menu({ isOpen, onClose }) {
         onClick={onClose} 
       />
       
-      {/* Zentriertes Menü - 60% größer, mehr Padding */}
-      <nav className="fixed left-1/2 top-1/2 z-50 w-[420px] -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-[var(--color-bg-secondary)] shadow-xl border border-[var(--color-border)] px-12 py-10">
+      {/* Zentriertes Menü - 85% Bildschirmbreite, 15% Innenabstand zu Rändern */}
+      <nav className="fixed left-[7.5%] right-[7.5%] top-1/2 z-50 -translate-y-1/2 rounded-2xl bg-[var(--color-bg-secondary)] shadow-xl border border-[var(--color-border)] p-[6%]">
         <ul className="flex flex-col gap-4">
           {MENU_ITEMS.map((item) => (
             <li key={item.path}>
