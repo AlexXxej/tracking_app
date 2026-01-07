@@ -1,24 +1,34 @@
-export function NotificationsPanel({ isOpen, onClose }) {
+import { useEffect, useState } from 'react'
+
+export function Modal({ isOpen, onClose, children }) {
+  const [isVisible, setIsVisible] = useState(false)
+
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden'
+      // Kleine Verzögerung für Fade-In
+      setTimeout(() => setIsVisible(true), 10)
+    } else {
+      setIsVisible(false)
+      document.body.style.overflow = 'unset'
+    }
+    
+    return () => {
+      document.body.style.overflow = 'unset'
+    }
+  }, [isOpen])
+
   if (!isOpen) return null
 
   return (
-    <>
-      {/* Overlay - Klick außerhalb schließt */}
+    <div className={`fixed inset-0 z-[60] flex items-center justify-center transition-opacity duration-300 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
       <div 
-        className="fixed inset-0 top-14 z-40 bg-black/60 transition-opacity duration-300"
-        onClick={onClose} 
+        className="absolute inset-0 bg-black/60" 
+        onClick={onClose}
       />
-      
-      {/* Zentriertes Panel - gleiche Größe wie Menü */}
-      <div 
-        className="fixed left-[7.5%] right-[7.5%] top-1/2 z-50 -translate-y-1/2 rounded-2xl bg-[var(--color-bg-tertiary)] shadow-xl border border-[var(--color-border)] transition-opacity duration-300"
-        style={{ padding: '6%', minHeight: '200px' }}
-      >
-        {/* Inhalt leer - wird später befüllt */}
-        <p className="text-[var(--color-text-secondary)] text-center">
-          Keine neuen Benachrichtigungen
-        </p>
+      <div className={`relative z-10 transition-all duration-300 ${isVisible ? 'scale-100 opacity-100' : 'scale-95 opacity-0'}`}>
+        {children}
       </div>
-    </>
+    </div>
   )
 }
