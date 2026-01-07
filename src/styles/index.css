@@ -13,6 +13,10 @@
   --color-success: #22c55e;
   --color-warning: #eab308;
   --color-error: #ef4444;
+  --color-confirm: #d4a056;
+  --color-confirm-hover: #c4914a;
+  --color-cancel: #3a3a3a;
+  --color-cancel-hover: #4a4a4a;
 }
 
 * {

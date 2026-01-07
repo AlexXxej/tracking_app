@@ -4,7 +4,21 @@ import { Menu } from '../components/navigation/Menu'
 import { MenuIcon } from '../components/navigation/MenuIcon'
 import { NewsIcon } from '../components/navigation/NewsIcon'
 import { BackButton } from '../components/navigation/BackButton'
-import { ROUTES } from '../utils/constants'
+import { ROUTES, MENU_ITEMS } from '../utils/constants'
+
+function getPageTitle(pathname) {
+  if (pathname === ROUTES.MAIN) {
+    return 'Zeiterfassung'
+  }
+  
+  // Finde Menüpunkt der zum Pfad passt
+  const menuItem = MENU_ITEMS.find(item => pathname.startsWith(item.path))
+  if (menuItem) {
+    return menuItem.label
+  }
+  
+  return 'Zeiterfassung'
+}
 
 export function AppLayout() {
   const [menuOpen, setMenuOpen] = useState(false)
@@ -12,6 +26,7 @@ export function AppLayout() {
   
   const isMainPage = location.pathname === ROUTES.MAIN
   const showBackButton = !isMainPage
+  const pageTitle = getPageTitle(location.pathname)
 
   return (
     <div className="flex h-full flex-col">
@@ -21,7 +36,7 @@ export function AppLayout() {
         </div>
         
         <h1 className="text-lg font-semibold text-[var(--color-text-primary)]">
-          Zeiterfassung
+          {pageTitle}
         </h1>
         
         <div className="flex w-24 items-center justify-end gap-1">

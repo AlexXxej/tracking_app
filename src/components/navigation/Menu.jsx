@@ -31,22 +31,22 @@ export function Menu({ isOpen, onClose }) {
       />
       
       {/* Zentriertes Menü */}
-      <nav className="fixed left-1/2 top-1/2 z-50 w-72 -translate-x-1/2 -translate-y-1/2 rounded-lg bg-[var(--color-bg-secondary)] shadow-xl border border-[var(--color-border)]">
-        <ul className="py-2">
+      <nav className="fixed left-1/2 top-1/2 z-50 w-80 -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-[var(--color-bg-secondary)] shadow-xl border border-[var(--color-border)] p-6">
+        <ul className="flex flex-col gap-3">
           {MENU_ITEMS.map((item) => (
             <li key={item.path}>
               <button
                 onClick={() => handleNavigate(item.path)}
-                className="w-full px-6 py-4 text-left text-[var(--color-text-primary)] transition-colors hover:bg-[var(--color-bg-tertiary)]"
+                className="w-full rounded-full bg-[var(--color-bg-tertiary)] px-6 py-4 text-left text-[var(--color-text-primary)] transition-colors hover:bg-[var(--color-border)]"
               >
                 {item.label}
               </button>
             </li>
           ))}
-          <li className="border-t border-[var(--color-border)] mt-2 pt-2">
+          <li className="mt-2">
             <button
               onClick={() => setShowLogoutConfirm(true)}
-              className="w-full px-6 py-4 text-left text-[var(--color-error)] transition-colors hover:bg-[var(--color-bg-tertiary)]"
+              className="w-full rounded-full bg-[var(--color-bg-tertiary)] px-6 py-4 text-left text-[var(--color-text-primary)] transition-colors hover:bg-[var(--color-border)]"
             >
               Abmelden
             </button>
@@ -60,8 +60,8 @@ export function Menu({ isOpen, onClose }) {
         onConfirm={handleLogout}
         title="Abmelden"
         message="Möchtest du dich wirklich abmelden?"
-        confirmText="Abmelden"
-        variant="danger"
+        confirmText="Bestätigen"
+        cancelText="Abbrechen"
       />
     </>
   )
