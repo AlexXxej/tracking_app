@@ -50,6 +50,7 @@ export const historieService = {
         baustelle:baustellen(id, bezeichnung, oberbegriff, plz, ort)
       `)
       .eq('user_id', userId)
+      .is('deleted_at', null)
       .gte('start_time', from.toISOString())
       .lte('start_time', to.toISOString())
       .order('start_time', { ascending: true })
@@ -58,11 +59,20 @@ export const historieService = {
     return data || []
   },
 
+  // Formatiere Datum als YYYY-MM-DD (lokal, nicht UTC)
+  toLocalDateStr(date) {
+    const d = new Date(date)
+    const year = d.getFullYear()
+    const month = String(d.getMonth() + 1).padStart(2, '0')
+    const day = String(d.getDate()).padStart(2, '0')
+    return `${year}-${month}-${day}`
+  },
+
   // Berechne Zusammenfassung pro Tag
   calculateDaySummary(entries, date) {
-    const dateStr = date.toISOString().split('T')[0]
+    const dateStr = this.toLocalDateStr(date)
     const dayEntries = entries.filter(e => {
-      const entryDate = new Date(e.start_time).toISOString().split('T')[0]
+      const entryDate = this.toLocalDateStr(new Date(e.start_time))
       return entryDate === dateStr
     })
 
@@ -143,6 +153,7 @@ export const historieService = {
         baustelle:baustellen(id, bezeichnung, oberbegriff, plz, ort)
       `)
       .eq('user_id', userId)
+      .is('deleted_at', null)
       .gte('start_time', from.toISOString())
       .lte('start_time', to.toISOString())
       .order('start_time', { ascending: true })

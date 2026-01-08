@@ -11,6 +11,7 @@ export const zeiterfassungService = {
       `)
       .eq('user_id', userId)
       .is('end_time', null)
+      .is('deleted_at', null)
       .order('start_time', { ascending: false })
       .limit(1)
       .single()
@@ -104,10 +105,47 @@ export const zeiterfassungService = {
         baustelle:baustellen(id, bezeichnung, plz, ort)
       `)
       .eq('user_id', userId)
+      .is('deleted_at', null)
       .gte('start_time', today.toISOString())
       .order('start_time', { ascending: false })
 
     if (error) throw error
     return data || []
+  },
+
+  // Eintrag aktualisieren (für Historie-Bearbeitung)
+  async updateEntry(entryId, updates) {
+    const { data, error } = await supabase
+      .from('zeiterfassung')
+      .update({
+        ...updates,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', entryId)
+      .select(`
+        *,
+        taetigkeit:taetigkeitstypen(id, name),
+        baustelle:baustellen(id, bezeichnung, plz, ort)
+      `)
+      .single()
+
+    if (error) throw error
+    return data
+  },
+
+  // Soft-Delete: Eintrag als gelöscht markieren
+  async softDeleteEntry(entryId) {
+    const { data, error } = await supabase
+      .from('zeiterfassung')
+      .update({
+        deleted_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', entryId)
+      .select()
+      .single()
+
+    if (error) throw error
+    return data
   },
 }

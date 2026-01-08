@@ -1,6 +1,7 @@
 @import "tailwindcss";
 
 :root {
+  --spacing-horizontal: 5%;
   --color-bg-primary: #0f0f0f;
   --color-bg-secondary: #1a1a1a;
   --color-bg-tertiary: #252525;

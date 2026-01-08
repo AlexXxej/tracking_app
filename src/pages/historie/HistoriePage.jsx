@@ -3,6 +3,7 @@ import { useAuth } from '../../hooks/useAuth'
 import { useSubNavigation } from '../../hooks/useSubNavigation'
 import { historieService } from '../../services/historie'
 import { Pagination } from '../../components/baustellen/BaustellenList'
+import { EntryEditModal } from '../../components/historie/EntryEditModal'
 
 function getDefaultDates() {
   const to = new Date()
@@ -33,7 +34,7 @@ function DaySummaryCard({ summary, onClick }) {
   )
 }
 
-function DayDetail({ date, entries }) {
+function DayDetail({ date, entries, onEntryClick }) {
   return (
     <div className="flex flex-col gap-4">
       <h2 className="text-lg font-semibold text-[var(--color-text-primary)]">
@@ -52,9 +53,10 @@ function DayDetail({ date, entries }) {
             const duration = end ? Math.round((end - start) / 1000 / 60) : null
 
             return (
-              <div
+              <button
                 key={entry.id}
-                className={`rounded-lg border p-3 ${
+                onClick={() => onEntryClick(entry)}
+                className={`rounded-lg border p-3 text-left transition-colors hover:border-[var(--color-accent)] ${
                   entry.is_break
                     ? 'border-[var(--color-border)] bg-[var(--color-bg-tertiary)]'
                     : 'border-[var(--color-border)] bg-[var(--color-bg-secondary)]'
@@ -88,7 +90,7 @@ function DayDetail({ date, entries }) {
                     {entry.notiz}
                   </div>
                 )}
-              </div>
+              </button>
             )
           })}
         </div>
@@ -114,6 +116,9 @@ export function HistoriePage() {
   // Detail-Ansicht
   const [selectedDay, setSelectedDay] = useState(null)
   const [dayEntries, setDayEntries] = useState([])
+
+  // Edit-Modal
+  const [editingEntry, setEditingEntry] = useState(null)
 
   const loadSummaries = useCallback(async (page = 1) => {
     if (!user?.id) return
@@ -162,13 +167,50 @@ export function HistoriePage() {
     }
   }
 
+  const handleEntryClick = (entry) => {
+    setEditingEntry(entry)
+  }
+
+  const handleEntrySave = async () => {
+    setEditingEntry(null)
+    // Reload day entries
+    if (selectedDay) {
+      const entries = await historieService.getDayDetail(user.id, selectedDay.date)
+      setDayEntries(entries)
+    }
+    // Reload summaries to update totals
+    loadSummaries(currentPage)
+  }
+
+  const handleEntryDelete = async () => {
+    setEditingEntry(null)
+    // Reload day entries
+    if (selectedDay) {
+      const entries = await historieService.getDayDetail(user.id, selectedDay.date)
+      setDayEntries(entries)
+    }
+    // Reload summaries to update totals
+    loadSummaries(currentPage)
+  }
+
   // Detail-Ansicht
   if (selectedDay) {
     return (
-      <DayDetail
-        date={selectedDay.date}
-        entries={dayEntries}
-      />
+      <>
+        <DayDetail
+          date={selectedDay.date}
+          entries={dayEntries}
+          onEntryClick={handleEntryClick}
+        />
+        {editingEntry && (
+          <EntryEditModal
+            entry={editingEntry}
+            onClose={() => setEditingEntry(null)}
+            onSave={handleEntrySave}
+            onDelete={handleEntryDelete}
+          />
+        )}
+      </>
     )
   }
 
