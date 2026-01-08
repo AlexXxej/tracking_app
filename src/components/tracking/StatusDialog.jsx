@@ -1,9 +1,9 @@
 import { Modal } from '../ui/Modal'
 
 const STATUS_OPTIONS = [
-  { value: 'abgeschlossen', label: 'Auftrag abgeschlossen' },
-  { value: 'kundendienst_offen', label: 'Kundendienst offen' },
-  { value: 'in_bearbeitung', label: 'In Bearbeitung' },
+  { value: 'fertig', label: 'Auftrag abgeschlossen' },
+  { value: 'teilweise', label: 'In Bearbeitung' },
+  { value: 'abgebrochen', label: 'Abgebrochen' },
 ]
 
 export function StatusDialog({ isOpen, onClose, onSelect }) {

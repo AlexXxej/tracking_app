@@ -20,16 +20,17 @@ export const zeiterfassungService = {
   },
 
   async startEntry({ userId, taetigkeitId, baustelleId = null, isBreak = false }) {
+    const insertData = {
+      user_id: userId,
+      taetigkeit_id: taetigkeitId,
+      baustelle_id: baustelleId,
+      start_time: new Date().toISOString(),
+      is_break: isBreak,
+    }
+
     const { data, error } = await supabase
       .from('zeiterfassung')
-      .insert({
-        user_id: userId,
-        taetigkeit_id: taetigkeitId,
-        baustelle_id: baustelleId,
-        start_time: new Date().toISOString(),
-        is_break: isBreak,
-        status: 'running',
-      })
+      .insert(insertData)
       .select(`
         *,
         taetigkeit:taetigkeitstypen(id, name),
@@ -47,10 +48,10 @@ export const zeiterfassungService = {
       updated_at: new Date().toISOString(),
     }
 
+    // Nur status setzen wenn explizit übergeben (für Baustellen)
+    // Erlaubte Werte: 'fertig', 'teilweise', 'abgebrochen'
     if (status) {
       updateData.status = status
-    } else {
-      updateData.status = 'completed'
     }
 
     const { data, error } = await supabase
@@ -75,7 +76,6 @@ export const zeiterfassungService = {
         baustelle_id: null,
         start_time: new Date().toISOString(),
         is_break: true,
-        status: 'running',
       })
       .select()
       .single()
@@ -85,7 +85,7 @@ export const zeiterfassungService = {
   },
 
   async endBreak(breakEntryId) {
-    return this.endEntry(breakEntryId, 'completed')
+    return this.endEntry(breakEntryId)
   },
 
   async getTodayEntries(userId) {
