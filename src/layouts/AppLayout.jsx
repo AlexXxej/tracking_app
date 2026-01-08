@@ -51,7 +51,7 @@ export function AppLayout() {
 
   return (
     <div className="flex h-full flex-col">
-      <header className="flex h-14 items-center justify-between border-b border-[var(--color-border)] bg-[var(--color-bg-secondary)] px-4">
+      <header className="flex h-14 items-center justify-between border-b border-[var(--color-border)] bg-[var(--color-bg-secondary)] px-[5%]">
         <div className="w-24">
           {showBackButton && <BackButton />}
         </div>
@@ -66,7 +66,7 @@ export function AppLayout() {
         </div>
       </header>
 
-      <main className="flex-1 overflow-auto p-4">
+      <main className="flex-1 overflow-auto px-[5%] py-4">
         <Outlet />
       </main>
 
