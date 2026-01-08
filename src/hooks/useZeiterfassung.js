@@ -69,16 +69,23 @@ export function useZeiterfassung() {
   const startPause = useCallback(async () => {
     if (!user?.id || !activeEntry?.id) return
 
+    // Finde den Pause-Tätigkeitstyp
+    const pauseTyp = taetigkeitstypen.find(t => t.name.toLowerCase() === 'pause')
+    if (!pauseTyp) {
+      setError('Kein Pause-Tätigkeitstyp gefunden')
+      return
+    }
+
     setError(null)
     try {
-      const breakEntry = await zeiterfassungService.startBreak(user.id, activeEntry.id)
+      const breakEntry = await zeiterfassungService.startBreak(user.id, activeEntry.id, pauseTyp.id)
       setActiveEntry(breakEntry)
       return breakEntry
     } catch (err) {
       setError(err.message)
       throw err
     }
-  }, [user?.id, activeEntry?.id])
+  }, [user?.id, activeEntry?.id, taetigkeitstypen])
 
   const endPause = useCallback(async () => {
     if (!activeEntry?.id) return

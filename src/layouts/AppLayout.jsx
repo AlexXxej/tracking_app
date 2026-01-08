@@ -5,19 +5,20 @@ import { MenuIcon } from '../components/navigation/MenuIcon'
 import { NewsIcon } from '../components/navigation/NewsIcon'
 import { BackButton } from '../components/navigation/BackButton'
 import { NotificationsPanel } from '../components/navigation/NotificationsPanel'
+import { useSubNavigation } from '../hooks/useSubNavigation'
 import { ROUTES, MENU_ITEMS } from '../utils/constants'
 
 function getPageTitle(pathname) {
   if (pathname === ROUTES.MAIN) {
     return 'Zeiterfassung'
   }
-  
+
   // Finde Menüpunkt der zum Pfad passt
   const menuItem = MENU_ITEMS.find(item => pathname.startsWith(item.path))
   if (menuItem) {
     return menuItem.label
   }
-  
+
   return 'Zeiterfassung'
 }
 
@@ -25,9 +26,10 @@ export function AppLayout() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [notificationsOpen, setNotificationsOpen] = useState(false)
   const location = useLocation()
-  
+  const { canGoBack } = useSubNavigation()
+
   const isMainPage = location.pathname === ROUTES.MAIN
-  const showBackButton = !isMainPage
+  const showBackButton = !isMainPage || canGoBack
   const pageTitle = getPageTitle(location.pathname)
 
   const handleNotificationsClick = () => {

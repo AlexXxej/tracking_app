@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { baustellenService } from '../../services/baustellen'
 
-export function BaustellenSearch({ onSelect, onCancel }) {
+export function BaustellenSearch({ onSelect }) {
   const [query, setQuery] = useState('')
   const [filterColumn, setFilterColumn] = useState('adresse')
   const [results, setResults] = useState([])
@@ -34,17 +34,9 @@ export function BaustellenSearch({ onSelect, onCancel }) {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-[var(--color-text-primary)]">
-          Baustelle wählen
-        </h2>
-        <button
-          onClick={onCancel}
-          className="text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
-        >
-          Abbrechen
-        </button>
-      </div>
+      <h2 className="text-lg font-semibold text-[var(--color-text-primary)]">
+        Baustelle wählen
+      </h2>
 
       <div className="flex gap-2">
         <input

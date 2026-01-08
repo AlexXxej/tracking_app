@@ -8,14 +8,13 @@ function formatDuration(startTime) {
 
   const hours = Math.floor(diff / 3600)
   const minutes = Math.floor((diff % 3600) / 60)
-  const seconds = diff % 60
 
   const pad = (n) => n.toString().padStart(2, '0')
-  return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`
+  return `${pad(hours)}:${pad(minutes)}`
 }
 
 export function ActiveTracking({ entry, onPause, onEnd, isBreak }) {
-  const [duration, setDuration] = useState('00:00:00')
+  const [duration, setDuration] = useState('00:00')
 
   useEffect(() => {
     if (!entry?.start_time) return
@@ -68,13 +67,13 @@ export function ActiveTracking({ entry, onPause, onEnd, isBreak }) {
           <>
             <button
               onClick={onPause}
-              className="flex-1 rounded-full bg-[var(--color-warning)] py-4 text-center font-medium text-lg text-black transition-colors hover:opacity-90"
+              className="flex-1 rounded-full bg-[var(--color-cancel)] py-4 text-center font-medium text-lg text-[var(--color-text-primary)] transition-colors hover:bg-[var(--color-cancel-hover)]"
             >
               Pause
             </button>
             <button
               onClick={onEnd}
-              className="flex-1 rounded-full bg-[var(--color-error)] py-4 text-center font-medium text-lg text-white transition-colors hover:opacity-90"
+              className="flex-1 rounded-full bg-[var(--color-confirm)] py-4 text-center font-medium text-lg text-black transition-colors hover:bg-[var(--color-confirm-hover)]"
             >
               Beenden
             </button>

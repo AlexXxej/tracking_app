@@ -1,11 +1,20 @@
 import { useNavigate, useLocation } from 'react-router-dom'
+import { useSubNavigation } from '../../hooks/useSubNavigation'
 import { getParentRoute } from '../../utils/constants'
 
 export function BackButton() {
   const navigate = useNavigate()
   const location = useLocation()
-  
+  const { canGoBack, goBack } = useSubNavigation()
+
   const handleBack = () => {
+    // Wenn Sub-Navigation aktiv (z.B. Baustellen-Suche), nutze diese
+    if (canGoBack) {
+      goBack()
+      return
+    }
+
+    // Sonst normale Route-Navigation
     const parentRoute = getParentRoute(location.pathname)
     if (parentRoute) {
       navigate(parentRoute)

@@ -65,19 +65,23 @@ export const zeiterfassungService = {
     return data
   },
 
-  async startBreak(userId, currentEntryId) {
+  async startBreak(userId, currentEntryId, pauseTaetigkeitId) {
     await this.endEntry(currentEntryId)
 
     const { data, error } = await supabase
       .from('zeiterfassung')
       .insert({
         user_id: userId,
-        taetigkeit_id: null,
+        taetigkeit_id: pauseTaetigkeitId,
         baustelle_id: null,
         start_time: new Date().toISOString(),
         is_break: true,
       })
-      .select()
+      .select(`
+        *,
+        taetigkeit:taetigkeitstypen(id, name),
+        baustelle:baustellen(id, bezeichnung, plz, ort)
+      `)
       .single()
 
     if (error) throw error

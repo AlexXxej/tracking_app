@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useZeiterfassung } from '../../hooks/useZeiterfassung'
+import { useSubNavigation } from '../../hooks/useSubNavigation'
 import { TaetigkeitSelect } from '../../components/tracking/TaetigkeitSelect'
 import { BaustellenSearch } from '../../components/tracking/BaustellenSearch'
 import { ActiveTracking } from '../../components/tracking/ActiveTracking'
@@ -21,9 +22,25 @@ export function MainPage() {
     isBaustelleTaetigkeit,
   } = useZeiterfassung()
 
+  const { enableBack, disableBack } = useSubNavigation()
+
   const [selectedTaetigkeit, setSelectedTaetigkeit] = useState(null)
   const [showBaustellenSearch, setShowBaustellenSearch] = useState(false)
   const [showStatusDialog, setShowStatusDialog] = useState(false)
+
+  const handleBaustellenCancel = () => {
+    setSelectedTaetigkeit(null)
+    setShowBaustellenSearch(false)
+  }
+
+  // Back-Button aktivieren wenn Baustellen-Suche offen
+  useEffect(() => {
+    if (showBaustellenSearch) {
+      enableBack(handleBaustellenCancel)
+    } else {
+      disableBack()
+    }
+  }, [showBaustellenSearch, enableBack, disableBack])
 
   const handleTaetigkeitSelect = async (taetigkeit) => {
     if (taetigkeit.name.toLowerCase() === BAUSTELLE_NAME) {
@@ -40,11 +57,6 @@ export function MainPage() {
       setSelectedTaetigkeit(null)
       setShowBaustellenSearch(false)
     }
-  }
-
-  const handleBaustellenCancel = () => {
-    setSelectedTaetigkeit(null)
-    setShowBaustellenSearch(false)
   }
 
   const handlePause = async () => {
@@ -96,7 +108,6 @@ export function MainPage() {
       ) : showBaustellenSearch ? (
         <BaustellenSearch
           onSelect={handleBaustelleSelect}
-          onCancel={handleBaustellenCancel}
         />
       ) : (
         <TaetigkeitSelect
