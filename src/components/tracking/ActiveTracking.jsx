@@ -50,7 +50,7 @@ export function ActiveTracking({ entry, onPause, onEnd, isBreak }) {
       </div>
 
       <div className="text-center">
-        <span className="font-mono text-4xl font-bold text-[var(--color-accent)]">
+        <span className="font-mono text-2xl font-bold text-[var(--color-text-primary)]">
           {duration}
         </span>
       </div>

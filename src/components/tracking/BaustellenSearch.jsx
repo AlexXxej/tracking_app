@@ -3,14 +3,17 @@ import { baustellenService } from '../../services/baustellen'
 
 export function BaustellenSearch({ onSelect }) {
   const [query, setQuery] = useState('')
-  const [filterColumn, setFilterColumn] = useState('adresse')
+  const [filterColumn, setFilterColumn] = useState('oberbegriff')
   const [results, setResults] = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(0)
 
-  const search = useCallback(async () => {
+  const search = useCallback(async (page = 1) => {
     if (query.trim().length < 2) {
       setResults([])
+      setTotalPages(0)
       return
     }
 
@@ -18,8 +21,10 @@ export function BaustellenSearch({ onSelect }) {
     setError(null)
 
     try {
-      const data = await baustellenService.search(query, filterColumn)
+      const { data, totalPages: pages } = await baustellenService.search(query, filterColumn, page)
       setResults(data)
+      setTotalPages(pages)
+      setCurrentPage(page)
     } catch (err) {
       setError(err.message)
     } finally {
@@ -28,9 +33,15 @@ export function BaustellenSearch({ onSelect }) {
   }, [query, filterColumn])
 
   useEffect(() => {
-    const timeout = setTimeout(search, 300)
+    const timeout = setTimeout(() => search(1), 300)
     return () => clearTimeout(timeout)
-  }, [search])
+  }, [query, filterColumn])
+
+  const goToPage = (page) => {
+    if (page >= 1 && page <= totalPages) {
+      search(page)
+    }
+  }
 
   return (
     <div className="flex flex-col gap-4">
@@ -95,6 +106,38 @@ export function BaustellenSearch({ onSelect }) {
           ))
         )}
       </div>
+
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-2">
+          <button
+            onClick={() => goToPage(currentPage - 1)}
+            disabled={currentPage === 1}
+            className="px-3 py-1 rounded border border-[var(--color-border)] text-[var(--color-text-secondary)] disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[var(--color-bg-tertiary)]"
+          >
+            &lt;
+          </button>
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+            <button
+              key={page}
+              onClick={() => goToPage(page)}
+              className={`px-3 py-1 rounded border ${
+                page === currentPage
+                  ? 'border-[var(--color-accent)] bg-[var(--color-accent)] text-black'
+                  : 'border-[var(--color-border)] text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-tertiary)]'
+              }`}
+            >
+              {page}
+            </button>
+          ))}
+          <button
+            onClick={() => goToPage(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            className="px-3 py-1 rounded border border-[var(--color-border)] text-[var(--color-text-secondary)] disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[var(--color-bg-tertiary)]"
+          >
+            &gt;
+          </button>
+        </div>
+      )}
 
       {query.length < 2 && (
         <p className="text-center text-sm text-[var(--color-text-tertiary)]">

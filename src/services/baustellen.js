@@ -1,29 +1,31 @@
 import { supabase } from './supabase'
 
 const SEARCHABLE_COLUMNS = [
-  { value: 'adresse', label: 'Adresse', columns: ['plz', 'ort'] },
+  { value: 'oberbegriff', label: 'Oberbegriff', columns: ['oberbegriff'] },
   { value: 'bezeichnung', label: 'Bezeichnung', columns: ['bezeichnung'] },
   { value: 'auftraggeber', label: 'Auftraggeber', columns: ['auftraggeber'] },
   { value: 'ansprechpartner', label: 'Ansprechpartner', columns: ['ansprechpartner'] },
   { value: 'zustaendig', label: 'Zuständig', columns: ['zustaendig'] },
-  { value: 'oberbegriff', label: 'Oberbegriff', columns: ['oberbegriff'] },
 ]
+
+const PAGE_SIZE = 10
 
 export const baustellenService = {
   searchableColumns: SEARCHABLE_COLUMNS,
+  pageSize: PAGE_SIZE,
 
-  async search(query, filterColumn = 'adresse', limit = 20) {
+  async search(query, filterColumn = 'oberbegriff', page = 1) {
     if (!query || query.trim().length < 2) {
-      return []
+      return { data: [], totalCount: 0, totalPages: 0 }
     }
 
     const searchTerm = `%${query.trim()}%`
     const filter = SEARCHABLE_COLUMNS.find(c => c.value === filterColumn) || SEARCHABLE_COLUMNS[0]
+    const offset = (page - 1) * PAGE_SIZE
 
     let queryBuilder = supabase
       .from('baustellen')
-      .select('id, bezeichnung, auftraggeber, ansprechpartner, zustaendig, oberbegriff, plz, ort, status')
-      .limit(limit)
+      .select('id, bezeichnung, auftraggeber, ansprechpartner, zustaendig, oberbegriff, plz, ort, status, datum', { count: 'exact' })
 
     if (filter.columns.length === 1) {
       queryBuilder = queryBuilder.ilike(filter.columns[0], searchTerm)
@@ -32,10 +34,14 @@ export const baustellenService = {
       queryBuilder = queryBuilder.or(orConditions)
     }
 
-    const { data, error } = await queryBuilder.order('bezeichnung', { ascending: true })
+    const { data, error, count } = await queryBuilder
+      .order('datum', { ascending: false, nullsFirst: false })
+      .range(offset, offset + PAGE_SIZE - 1)
 
     if (error) throw error
-    return data || []
+
+    const totalPages = Math.ceil((count || 0) / PAGE_SIZE)
+    return { data: data || [], totalCount: count || 0, totalPages }
   },
 
   async getById(id) {

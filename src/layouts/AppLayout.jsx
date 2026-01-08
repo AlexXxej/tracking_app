@@ -33,7 +33,20 @@ export function AppLayout() {
   const pageTitle = getPageTitle(location.pathname)
 
   const handleNotificationsClick = () => {
-    setNotificationsOpen(true)
+    if (notificationsOpen) {
+      // Toggle: schließen wenn bereits offen
+      setNotificationsOpen(false)
+    } else {
+      // Öffnen und Menü schließen
+      setMenuOpen(false)
+      setNotificationsOpen(true)
+    }
+  }
+
+  const handleMenuClick = () => {
+    // Notifications schließen und Menü öffnen
+    setNotificationsOpen(false)
+    setMenuOpen(true)
   }
 
   return (
@@ -42,14 +55,14 @@ export function AppLayout() {
         <div className="w-24">
           {showBackButton && <BackButton />}
         </div>
-        
+
         <h1 className="text-lg font-semibold text-[var(--color-text-primary)]">
           {pageTitle}
         </h1>
-        
+
         <div className="flex w-24 items-center justify-end gap-1">
           <NewsIcon hasNews={false} onClick={handleNotificationsClick} />
-          <MenuIcon onClick={() => setMenuOpen(true)} />
+          <MenuIcon onClick={handleMenuClick} />
         </div>
       </header>
 
