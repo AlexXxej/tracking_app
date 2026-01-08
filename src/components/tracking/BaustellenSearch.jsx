@@ -92,10 +92,15 @@ export function BaustellenSearch({ onSelect }) {
               className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-secondary)] p-4 text-left transition-colors hover:border-[var(--color-accent)] hover:bg-[var(--color-bg-tertiary)]"
             >
               <div className="font-medium text-[var(--color-text-primary)]">
-                {baustelle.bezeichnung}
+                {baustelle.oberbegriff}
+                {baustelle.status && (
+                  <span className="ml-2 text-[var(--color-text-secondary)]">
+                    ({baustelle.status})
+                  </span>
+                )}
               </div>
               <div className="text-sm text-[var(--color-text-secondary)]">
-                {baustellenService.formatAddress(baustelle)}
+                {baustelle.bezeichnung}
               </div>
               {baustelle.auftraggeber && (
                 <div className="text-sm text-[var(--color-text-tertiary)]">
