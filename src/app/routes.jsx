@@ -10,7 +10,6 @@ import { TagesberichtPage } from '../pages/tagesbericht/TagesberichtPage'
 import { BaustellenPage } from '../pages/baustellen/BaustellenPage'
 import { HistoriePage } from '../pages/historie/HistoriePage'
 import { EinstellungenPage } from '../pages/einstellungen/EinstellungenPage'
-import { AktionPage } from '../pages/aktion/AktionPage'
 import { ROUTES } from '../utils/constants'
 
 export const router = createBrowserRouter([
@@ -34,7 +33,6 @@ export const router = createBrowserRouter([
       { path: ROUTES.BAUSTELLEN, element: <BaustellenPage /> },
       { path: ROUTES.HISTORIE, element: <HistoriePage /> },
       { path: ROUTES.EINSTELLUNGEN, element: <EinstellungenPage /> },
-      { path: ROUTES.AKTION, element: <AktionPage /> },
     ],
   },
 ])
