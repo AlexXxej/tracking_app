@@ -6,8 +6,9 @@ export const zeiterfassungService = {
       .from('zeiterfassung')
       .select(`
         *,
-        taetigkeit:taetigkeitstypen(id, name),
-        baustelle:baustellen(id, bezeichnung, plz, ort)
+        taetigkeit:taetigkeitstypen(id, name, has_subtaetigkeiten),
+        baustelle:baustellen(id, bezeichnung, plz, ort),
+        sub_taetigkeit:sub_taetigkeiten(id, name)
       `)
       .eq('user_id', userId)
       .is('end_time', null)
@@ -20,11 +21,12 @@ export const zeiterfassungService = {
     return data
   },
 
-  async startEntry({ userId, taetigkeitId, baustelleId = null, isBreak = false }) {
+  async startEntry({ userId, taetigkeitId, baustelleId = null, subTaetigkeitId = null, isBreak = false }) {
     const insertData = {
       user_id: userId,
       taetigkeit_id: taetigkeitId,
       baustelle_id: baustelleId,
+      sub_taetigkeit_id: subTaetigkeitId,
       start_time: new Date().toISOString(),
       is_break: isBreak,
     }
@@ -34,8 +36,9 @@ export const zeiterfassungService = {
       .insert(insertData)
       .select(`
         *,
-        taetigkeit:taetigkeitstypen(id, name),
-        baustelle:baustellen(id, bezeichnung, plz, ort)
+        taetigkeit:taetigkeitstypen(id, name, has_subtaetigkeiten),
+        baustelle:baustellen(id, bezeichnung, plz, ort),
+        sub_taetigkeit:sub_taetigkeiten(id, name)
       `)
       .single()
 
@@ -80,8 +83,9 @@ export const zeiterfassungService = {
       })
       .select(`
         *,
-        taetigkeit:taetigkeitstypen(id, name),
-        baustelle:baustellen(id, bezeichnung, plz, ort)
+        taetigkeit:taetigkeitstypen(id, name, has_subtaetigkeiten),
+        baustelle:baustellen(id, bezeichnung, plz, ort),
+        sub_taetigkeit:sub_taetigkeiten(id, name)
       `)
       .single()
 
@@ -101,8 +105,9 @@ export const zeiterfassungService = {
       .from('zeiterfassung')
       .select(`
         *,
-        taetigkeit:taetigkeitstypen(id, name),
-        baustelle:baustellen(id, bezeichnung, plz, ort)
+        taetigkeit:taetigkeitstypen(id, name, has_subtaetigkeiten),
+        baustelle:baustellen(id, bezeichnung, plz, ort),
+        sub_taetigkeit:sub_taetigkeiten(id, name)
       `)
       .eq('user_id', userId)
       .is('deleted_at', null)
@@ -124,8 +129,9 @@ export const zeiterfassungService = {
       .eq('id', entryId)
       .select(`
         *,
-        taetigkeit:taetigkeitstypen(id, name),
-        baustelle:baustellen(id, bezeichnung, plz, ort)
+        taetigkeit:taetigkeitstypen(id, name, has_subtaetigkeiten),
+        baustelle:baustellen(id, bezeichnung, plz, ort),
+        sub_taetigkeit:sub_taetigkeiten(id, name)
       `)
       .single()
 

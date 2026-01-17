@@ -7,6 +7,7 @@ export const ROUTES = {
   BAUSTELLEN: '/baustellen',
   HISTORIE: '/historie',
   EINSTELLUNGEN: '/einstellungen',
+  AKTION: '/aktion',
 }
 
 export const MENU_ITEMS = [
@@ -14,6 +15,7 @@ export const MENU_ITEMS = [
   { label: 'Baustellen', path: ROUTES.BAUSTELLEN },
   { label: 'Historie', path: ROUTES.HISTORIE },
   { label: 'Einstellungen', path: ROUTES.EINSTELLUNGEN },
+  { label: 'Aktion', path: ROUTES.AKTION },
 ]
 
 // Ebenen-basierte Navigation: Gibt den Parent-Pfad zurück

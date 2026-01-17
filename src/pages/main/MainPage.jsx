@@ -1,14 +1,18 @@
 import { useState, useEffect } from 'react'
 import { useZeiterfassung } from '../../hooks/useZeiterfassung'
 import { useSubNavigation } from '../../hooks/useSubNavigation'
+import { useAuth } from '../../hooks/useAuth'
 import { TaetigkeitSelect } from '../../components/tracking/TaetigkeitSelect'
 import { BaustellenSearch } from '../../components/tracking/BaustellenSearch'
+import { SubTaetigkeitSelect } from '../../components/tracking/SubTaetigkeitSelect'
 import { ActiveTracking } from '../../components/tracking/ActiveTracking'
 import { StatusDialog } from '../../components/tracking/StatusDialog'
+import { subTaetigkeitenService } from '../../services/subTaetigkeiten'
 
 const BAUSTELLE_NAME = 'baustelle'
 
 export function MainPage() {
+  const { user } = useAuth()
   const {
     activeEntry,
     taetigkeitstypen,
@@ -25,7 +29,11 @@ export function MainPage() {
   const { enableBack, disableBack } = useSubNavigation()
 
   const [selectedTaetigkeit, setSelectedTaetigkeit] = useState(null)
+  const [selectedBaustelle, setSelectedBaustelle] = useState(null)
   const [showBaustellenSearch, setShowBaustellenSearch] = useState(false)
+  const [showSubTaetigkeitSelect, setShowSubTaetigkeitSelect] = useState(false)
+  const [subTaetigkeiten, setSubTaetigkeiten] = useState([])
+  const [subTaetigkeitLoading, setSubTaetigkeitLoading] = useState(false)
   const [showStatusDialog, setShowStatusDialog] = useState(false)
 
   const handleBaustellenCancel = () => {
@@ -33,30 +41,89 @@ export function MainPage() {
     setShowBaustellenSearch(false)
   }
 
-  // Back-Button aktivieren wenn Baustellen-Suche offen
+  const handleSubTaetigkeitCancel = () => {
+    setSelectedTaetigkeit(null)
+    setSelectedBaustelle(null)
+    setShowSubTaetigkeitSelect(false)
+    setSubTaetigkeiten([])
+  }
+
+  // Back-Button aktivieren wenn Baustellen-Suche oder Subtätigkeiten-Auswahl offen
   useEffect(() => {
-    if (showBaustellenSearch) {
+    if (showSubTaetigkeitSelect) {
+      enableBack(handleSubTaetigkeitCancel)
+    } else if (showBaustellenSearch) {
       enableBack(handleBaustellenCancel)
     } else {
       disableBack()
     }
-  }, [showBaustellenSearch, enableBack, disableBack])
+  }, [showBaustellenSearch, showSubTaetigkeitSelect, enableBack, disableBack])
 
-  const handleTaetigkeitSelect = async (taetigkeit) => {
-    if (taetigkeit.name.toLowerCase() === BAUSTELLE_NAME) {
-      setSelectedTaetigkeit(taetigkeit)
-      setShowBaustellenSearch(true)
-    } else {
-      await startTaetigkeit(taetigkeit.id)
+  const loadSubTaetigkeiten = async (taetigkeitId) => {
+    if (!user?.id) return
+    setSubTaetigkeitLoading(true)
+    try {
+      const subs = await subTaetigkeitenService.getByTaetigkeitstyp(taetigkeitId, user.id)
+      setSubTaetigkeiten(subs)
+      setShowSubTaetigkeitSelect(true)
+    } catch (err) {
+      console.error('Fehler beim Laden der Subtätigkeiten:', err)
+    } finally {
+      setSubTaetigkeitLoading(false)
     }
   }
 
-  const handleBaustelleSelect = async (baustelle) => {
-    if (selectedTaetigkeit) {
-      await startTaetigkeit(selectedTaetigkeit.id, baustelle.id)
-      setSelectedTaetigkeit(null)
-      setShowBaustellenSearch(false)
+  const handleTaetigkeitSelect = async (taetigkeit) => {
+    setSelectedTaetigkeit(taetigkeit)
+
+    // Schritt 1: Prüfe ob Baustelle benötigt
+    if (taetigkeit.name.toLowerCase() === BAUSTELLE_NAME) {
+      setShowBaustellenSearch(true)
+      return
     }
+
+    // Schritt 2: Prüfe ob Subtätigkeiten benötigt
+    if (taetigkeit.has_subtaetigkeiten) {
+      await loadSubTaetigkeiten(taetigkeit.id)
+      return
+    }
+
+    // Direkt starten
+    await startTaetigkeit(taetigkeit.id)
+    setSelectedTaetigkeit(null)
+  }
+
+  const handleBaustelleSelect = async (baustelle) => {
+    if (!selectedTaetigkeit) return
+
+    setShowBaustellenSearch(false)
+
+    // Prüfe ob Subtätigkeiten benötigt
+    if (selectedTaetigkeit.has_subtaetigkeiten) {
+      setSelectedBaustelle(baustelle)
+      await loadSubTaetigkeiten(selectedTaetigkeit.id)
+      return
+    }
+
+    // Direkt starten
+    await startTaetigkeit(selectedTaetigkeit.id, baustelle.id)
+    setSelectedTaetigkeit(null)
+  }
+
+  const handleSubTaetigkeitSelect = async (subTaetigkeit) => {
+    if (!selectedTaetigkeit) return
+
+    await startTaetigkeit(
+      selectedTaetigkeit.id,
+      selectedBaustelle?.id || null,
+      subTaetigkeit.id
+    )
+
+    // Reset
+    setSelectedTaetigkeit(null)
+    setSelectedBaustelle(null)
+    setShowSubTaetigkeitSelect(false)
+    setSubTaetigkeiten([])
   }
 
   const handlePause = async () => {
@@ -104,6 +171,12 @@ export function MainPage() {
           onPause={handlePause}
           onEnd={isBreakActive ? handleEndBreak : handleEnd}
           isBreak={isBreakActive}
+        />
+      ) : showSubTaetigkeitSelect ? (
+        <SubTaetigkeitSelect
+          subTaetigkeiten={subTaetigkeiten}
+          onSelect={handleSubTaetigkeitSelect}
+          loading={subTaetigkeitLoading}
         />
       ) : showBaustellenSearch ? (
         <BaustellenSearch

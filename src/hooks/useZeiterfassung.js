@@ -35,7 +35,7 @@ export function useZeiterfassung() {
     loadData()
   }, [loadData])
 
-  const startTaetigkeit = useCallback(async (taetigkeitId, baustelleId = null) => {
+  const startTaetigkeit = useCallback(async (taetigkeitId, baustelleId = null, subTaetigkeitId = null) => {
     if (!user?.id) return
 
     setError(null)
@@ -44,6 +44,7 @@ export function useZeiterfassung() {
         userId: user.id,
         taetigkeitId,
         baustelleId,
+        subTaetigkeitId,
       })
       setActiveEntry(entry)
       return entry
