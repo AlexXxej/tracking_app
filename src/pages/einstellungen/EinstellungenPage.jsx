@@ -129,7 +129,7 @@ export function EinstellungenPage() {
       )}
 
       {/* Status festlegen Sektion */}
-      <div className="flex flex-col gap-4 pt-6 border-t border-[var(--color-border)]">
+      <div className="mt-8 flex flex-col gap-4 pt-6 border-t border-[var(--color-border)]">
         <h3 className="text-lg font-medium text-[var(--color-text-primary)]">
           Status festlegen
         </h3>

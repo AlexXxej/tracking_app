@@ -17,33 +17,33 @@ const STATUS_LABELS = {
 function DayHeader({ datum, arbeitMinuten, pauseMinuten, baustellenAnzahl, personalStatus }) {
   return (
     <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-secondary)] p-4">
-      <div className="text-lg font-medium text-[var(--color-text-primary)] mb-3">
+      <div className="text-lg font-medium text-[var(--color-text-primary)] mb-4">
         {tagesberichtService.formatDatumLang(datum)}
       </div>
 
-      <div className="flex flex-col gap-2 text-sm">
-        <div className="flex justify-between">
-          <span className="text-[var(--color-text-secondary)]">Arbeitszeit:</span>
-          <span className="text-[var(--color-text-primary)] font-medium">
+      <div className="grid grid-cols-2 gap-3 text-sm">
+        <div>
+          <div className="text-[var(--color-text-secondary)]">Arbeitszeit</div>
+          <div className="text-[var(--color-text-primary)] font-medium">
             {tagesberichtService.formatMinutes(arbeitMinuten)}
-          </span>
+          </div>
         </div>
-        <div className="flex justify-between">
-          <span className="text-[var(--color-text-secondary)]">Pausenzeit:</span>
-          <span className="text-[var(--color-text-primary)]">
+        <div>
+          <div className="text-[var(--color-text-secondary)]">Pausenzeit</div>
+          <div className="text-[var(--color-text-primary)]">
             {tagesberichtService.formatMinutes(pauseMinuten)}
-          </span>
+          </div>
         </div>
-        <div className="flex justify-between">
-          <span className="text-[var(--color-text-secondary)]">Baustellen:</span>
-          <span className="text-[var(--color-text-primary)]">{baustellenAnzahl}</span>
+        <div>
+          <div className="text-[var(--color-text-secondary)]">Baustellen</div>
+          <div className="text-[var(--color-text-primary)]">{baustellenAnzahl}</div>
         </div>
         {personalStatus && (
-          <div className="flex justify-between">
-            <span className="text-[var(--color-text-secondary)]">Status:</span>
-            <span className="text-[var(--color-text-primary)]">
+          <div>
+            <div className="text-[var(--color-text-secondary)]">Status</div>
+            <div className="text-[var(--color-text-primary)]">
               {STATUS_ICONS[personalStatus] || ''} {STATUS_LABELS[personalStatus] || personalStatus}
-            </span>
+            </div>
           </div>
         )}
       </div>
