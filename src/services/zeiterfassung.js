@@ -22,13 +22,26 @@ export const zeiterfassungService = {
   },
 
   async startEntry({ userId, taetigkeitId, baustelleId = null, subTaetigkeitId = null, isBreak = false }) {
+    // Aktuellen Tagesstatus abfragen
+    const now = new Date().toISOString()
+    const { data: statusData } = await supabase
+      .from('tagesstatus')
+      .select('status')
+      .eq('user_id', userId)
+      .lte('valid_from', now)
+      .or(`valid_to.is.null,valid_to.gte.${now}`)
+      .order('valid_to', { ascending: true, nullsFirst: false })
+      .limit(1)
+      .maybeSingle()
+
     const insertData = {
       user_id: userId,
       taetigkeit_id: taetigkeitId,
       baustelle_id: baustelleId,
       sub_taetigkeit_id: subTaetigkeitId,
-      start_time: new Date().toISOString(),
+      start_time: now,
       is_break: isBreak,
+      personal_status: statusData?.status || 'arbeit',
     }
 
     const { data, error } = await supabase

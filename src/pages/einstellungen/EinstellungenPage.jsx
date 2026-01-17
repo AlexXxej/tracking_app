@@ -1,10 +1,17 @@
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { DatePicker } from '../../components/ui/DatePicker'
 import { Toggle } from '../../components/ui/Toggle'
 import { Button } from '../../components/ui/Button'
 import { webhookService } from '../../services/webhook'
+import { tagesstatusService } from '../../services/tagesstatus'
+import { useAuth } from '../../hooks/useAuth'
+import { StatusForm } from '../../components/einstellungen/StatusForm'
+import { StatusList } from '../../components/einstellungen/StatusList'
 
 export function EinstellungenPage() {
+  const { user } = useAuth()
+
+  // Datenübertragung State
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
   const [webhookEnabled, setWebhookEnabled] = useState(false)
@@ -12,7 +19,29 @@ export function EinstellungenPage() {
   const [responseMessage, setResponseMessage] = useState(null)
   const [error, setError] = useState(null)
 
+  // Status festlegen State
+  const [statusEntries, setStatusEntries] = useState([])
+  const [statusLoading, setStatusLoading] = useState(false)
+
   const canTrigger = startDate && endDate && startDate <= endDate
+
+  // Status-Einträge laden
+  const loadStatusEntries = useCallback(async () => {
+    if (!user?.id) return
+    setStatusLoading(true)
+    try {
+      const entries = await tagesstatusService.getActiveAndFuture(user.id)
+      setStatusEntries(entries)
+    } catch (err) {
+      console.error('Fehler beim Laden der Status-Einträge:', err)
+    } finally {
+      setStatusLoading(false)
+    }
+  }, [user?.id])
+
+  useEffect(() => {
+    loadStatusEntries()
+  }, [loadStatusEntries])
 
   const handleTrigger = async () => {
     if (!canTrigger || !webhookEnabled) return
@@ -31,12 +60,19 @@ export function EinstellungenPage() {
     }
   }
 
+  const handleStatusSave = async (data) => {
+    await tagesstatusService.create(data)
+    await loadStatusEntries()
+  }
+
+  const handleStatusDelete = async (entryId) => {
+    await tagesstatusService.delete(entryId)
+    await loadStatusEntries()
+  }
+
   return (
     <div className="flex flex-col gap-6">
-      <h2 className="text-xl font-semibold text-[var(--color-text-primary)]">
-        Einstellungen
-      </h2>
-
+      {/* Datenübertragung Sektion */}
       <div className="flex flex-col gap-4">
         <h3 className="text-lg font-medium text-[var(--color-text-primary)]">
           Datenübertragung
@@ -65,7 +101,7 @@ export function EinstellungenPage() {
 
       <div className="flex flex-col gap-4 pt-4 border-t border-[var(--color-border)]">
         <Toggle
-          label="Webhook auslösen"
+          label="Datenübertragung aktivieren"
           checked={webhookEnabled}
           onChange={setWebhookEnabled}
           disabled={!canTrigger}
@@ -91,6 +127,21 @@ export function EinstellungenPage() {
           <p className="text-sm text-green-500">{responseMessage}</p>
         </div>
       )}
+
+      {/* Status festlegen Sektion */}
+      <div className="flex flex-col gap-4 pt-6 border-t border-[var(--color-border)]">
+        <h3 className="text-lg font-medium text-[var(--color-text-primary)]">
+          Status festlegen
+        </h3>
+
+        <StatusForm userId={user?.id} onSave={handleStatusSave} />
+
+        <StatusList
+          entries={statusEntries}
+          onDelete={handleStatusDelete}
+          loading={statusLoading}
+        />
+      </div>
     </div>
   )
 }
