@@ -4,6 +4,7 @@ import { useSubNavigation } from '../../hooks/useSubNavigation'
 import { historieService } from '../../services/historie'
 import { Pagination } from '../../components/baustellen/BaustellenList'
 import { EntryEditModal } from '../../components/historie/EntryEditModal'
+import { ManualEntryModal } from '../../components/historie/ManualEntryModal'
 
 function getDefaultDates() {
   const to = new Date()
@@ -120,6 +121,9 @@ export function HistoriePage() {
   // Edit-Modal
   const [editingEntry, setEditingEntry] = useState(null)
 
+  // Manual-Entry-Modal
+  const [showManualEntry, setShowManualEntry] = useState(false)
+
   const loadSummaries = useCallback(async (page = 1) => {
     if (!user?.id) return
 
@@ -193,6 +197,17 @@ export function HistoriePage() {
     loadSummaries(currentPage)
   }
 
+  const handleManualEntrySave = async () => {
+    setShowManualEntry(false)
+    // Reload day entries
+    if (selectedDay) {
+      const entries = await historieService.getDayDetail(user.id, selectedDay.date)
+      setDayEntries(entries)
+    }
+    // Reload summaries to update totals
+    loadSummaries(currentPage)
+  }
+
   // Detail-Ansicht
   if (selectedDay) {
     return (
@@ -210,6 +225,22 @@ export function HistoriePage() {
             onDelete={handleEntryDelete}
           />
         )}
+        {showManualEntry && (
+          <ManualEntryModal
+            date={selectedDay.date}
+            onClose={() => setShowManualEntry(false)}
+            onSave={handleManualEntrySave}
+          />
+        )}
+        <button
+          onClick={() => setShowManualEntry(true)}
+          className="fixed bottom-4 right-4 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-[var(--color-accent)] text-white shadow-lg transition-transform hover:scale-105"
+          title="Neuer Eintrag"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+          </svg>
+        </button>
       </>
     )
   }

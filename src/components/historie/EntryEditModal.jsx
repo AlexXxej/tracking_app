@@ -1,6 +1,9 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useAuth } from '../../hooks/useAuth'
 import { zeiterfassungService } from '../../services/zeiterfassung'
 import { historieService } from '../../services/historie'
+import { taetigkeitstypenService } from '../../services/taetigkeitstypen'
+import { baustellenService } from '../../services/baustellen'
 
 function formatTimeForInput(isoString) {
   if (!isoString) return ''
@@ -19,12 +22,43 @@ function combineDateAndTime(dateIso, timeString) {
 }
 
 export function EntryEditModal({ entry, onClose, onSave, onDelete }) {
+  const { user } = useAuth()
+
   const [startTime, setStartTime] = useState(formatTimeForInput(entry.start_time))
   const [endTime, setEndTime] = useState(formatTimeForInput(entry.end_time))
   const [notiz, setNotiz] = useState(entry.notiz || '')
   const [saving, setSaving] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [error, setError] = useState(null)
+
+  // Neue Felder
+  const [taetigkeiten, setTaetigkeiten] = useState([])
+  const [baustellen, setBaustellen] = useState([])
+  const [selectedTaetigkeit, setSelectedTaetigkeit] = useState(entry.taetigkeit?.id || '')
+  const [selectedBaustelle, setSelectedBaustelle] = useState(entry.baustelle?.id || '')
+  const [personalStatus, setPersonalStatus] = useState(entry.personal_status || 'arbeit')
+  const [loadingData, setLoadingData] = useState(true)
+
+  useEffect(() => {
+    async function loadData() {
+      if (!user?.id) return
+
+      try {
+        const [taetigkeitenData, baustellenData] = await Promise.all([
+          taetigkeitstypenService.getByUser(user.id),
+          baustellenService.getLatest(1)
+        ])
+        setTaetigkeiten(taetigkeitenData)
+        setBaustellen(baustellenData.data)
+      } catch (err) {
+        setError(err.message)
+      } finally {
+        setLoadingData(false)
+      }
+    }
+
+    loadData()
+  }, [user?.id])
 
   const isBreak = entry.is_break
   const taetigkeitName = isBreak ? 'Pause' : entry.taetigkeit?.name || 'Tätigkeit'
@@ -37,6 +71,9 @@ export function EntryEditModal({ entry, onClose, onSave, onDelete }) {
       const updates = {
         start_time: combineDateAndTime(entry.start_time, startTime),
         notiz: notiz || null,
+        taetigkeit_id: selectedTaetigkeit || null,
+        baustelle_id: selectedBaustelle || null,
+        personal_status: personalStatus,
       }
 
       if (endTime) {
@@ -67,7 +104,7 @@ export function EntryEditModal({ entry, onClose, onSave, onDelete }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="mx-4 w-full max-w-md rounded-lg bg-[var(--color-bg-secondary)] p-6">
+      <div className="mx-4 w-full max-w-md rounded-lg bg-[var(--color-bg-secondary)] p-6 max-h-[90vh] overflow-auto">
         <h2 className="mb-4 text-lg font-semibold text-[var(--color-text-primary)]">
           {taetigkeitName} bearbeiten
         </h2>
@@ -111,6 +148,59 @@ export function EntryEditModal({ entry, onClose, onSave, onDelete }) {
               />
             </div>
           </div>
+
+          {!isBreak && !loadingData && (
+            <>
+              <div>
+                <label className="mb-1 block text-xs text-[var(--color-text-tertiary)]">
+                  Tätigkeit
+                </label>
+                <select
+                  value={selectedTaetigkeit}
+                  onChange={(e) => setSelectedTaetigkeit(e.target.value)}
+                  className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-tertiary)] px-3 py-2 text-[var(--color-text-primary)] focus:border-[var(--color-accent)] focus:outline-none"
+                >
+                  <option value="">Keine</option>
+                  {taetigkeiten.map((t) => (
+                    <option key={t.id} value={t.id}>{t.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="mb-1 block text-xs text-[var(--color-text-tertiary)]">
+                  Baustelle
+                </label>
+                <select
+                  value={selectedBaustelle}
+                  onChange={(e) => setSelectedBaustelle(e.target.value)}
+                  className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-tertiary)] px-3 py-2 text-[var(--color-text-primary)] focus:border-[var(--color-accent)] focus:outline-none"
+                >
+                  <option value="">Keine</option>
+                  {baustellen.map((b) => (
+                    <option key={b.id} value={b.id}>
+                      {b.oberbegriff} - {b.bezeichnung}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="mb-1 block text-xs text-[var(--color-text-tertiary)]">
+                  Status
+                </label>
+                <select
+                  value={personalStatus}
+                  onChange={(e) => setPersonalStatus(e.target.value)}
+                  className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-tertiary)] px-3 py-2 text-[var(--color-text-primary)] focus:border-[var(--color-accent)] focus:outline-none"
+                >
+                  <option value="arbeit">Arbeit</option>
+                  <option value="krank">Krank</option>
+                  <option value="urlaub">Urlaub</option>
+                </select>
+              </div>
+            </>
+          )}
 
           {!isBreak && (
             <div>
@@ -162,7 +252,7 @@ export function EntryEditModal({ entry, onClose, onSave, onDelete }) {
               </button>
               <button
                 onClick={handleSave}
-                disabled={saving}
+                disabled={saving || loadingData}
                 className="flex-1 rounded-lg bg-[var(--color-confirm)] py-3 font-medium text-black transition-colors hover:bg-[var(--color-confirm-hover)]"
               >
                 {saving ? 'Speichern...' : 'Speichern'}

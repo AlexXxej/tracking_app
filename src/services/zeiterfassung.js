@@ -162,4 +162,27 @@ export const zeiterfassungService = {
     if (error) throw error
     return data
   },
+
+  // Manuellen Eintrag erstellen (für Historie)
+  async createManualEntry({ userId, taetigkeitId, baustelleId = null, startTime, endTime, notiz = null, personalStatus = 'arbeit' }) {
+    const insertData = {
+      user_id: userId,
+      taetigkeit_id: taetigkeitId,
+      baustelle_id: baustelleId,
+      start_time: startTime,
+      end_time: endTime,
+      notiz,
+      personal_status: personalStatus,
+      is_break: false,
+    }
+
+    const { data, error } = await supabase
+      .from('zeiterfassung')
+      .insert(insertData)
+      .select(ZEITERFASSUNG_SELECT)
+      .single()
+
+    if (error) throw error
+    return data
+  },
 }
