@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '../../hooks/useAuth'
 import { useSubNavigation } from '../../hooks/useSubNavigation'
-import { supabase } from '../../services/supabase'
+import { auth } from '../../services/auth'
 import { baustellenService } from '../../services/baustellen'
 import { BaustellenList, Pagination } from '../../components/baustellen/BaustellenList'
 import { BaustellenDetail } from '../../components/baustellen/BaustellenDetail'
@@ -33,12 +33,12 @@ export function BaustellenPage() {
   useEffect(() => {
     const loadUserPermission = async () => {
       if (!user?.id) return
-      const { data } = await supabase
-        .from('users')
-        .select('can_edit_all_baustellen')
-        .eq('id', user.id)
-        .single()
-      setCanEdit(data?.can_edit_all_baustellen || false)
+      try {
+        const permissions = await auth.getUserPermissions(user.id)
+        setCanEdit(permissions.canEditAllBaustellen)
+      } catch {
+        setCanEdit(false)
+      }
     }
     loadUserPermission()
   }, [user?.id])

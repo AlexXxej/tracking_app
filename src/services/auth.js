@@ -51,4 +51,17 @@ export const auth = {
   onAuthStateChange(callback) {
     return supabase.auth.onAuthStateChange(callback)
   },
+
+  async getUserPermissions(userId) {
+    const { data, error } = await supabase
+      .from('users')
+      .select('can_edit_all_baustellen')
+      .eq('id', userId)
+      .single()
+
+    if (error) throw error
+    return {
+      canEditAllBaustellen: data?.can_edit_all_baustellen || false,
+    }
+  },
 }

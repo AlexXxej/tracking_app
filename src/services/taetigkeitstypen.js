@@ -12,15 +12,4 @@ export const taetigkeitstypenService = {
     if (error) throw error
     return data || []
   },
-
-  async getById(id) {
-    const { data, error } = await supabase
-      .from('taetigkeitstypen')
-      .select('*')
-      .eq('id', id)
-      .single()
-
-    if (error) throw error
-    return data
-  },
 }

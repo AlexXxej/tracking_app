@@ -1,15 +1,17 @@
 import { supabase } from './supabase'
 
+const ZEITERFASSUNG_SELECT = `
+  *,
+  taetigkeit:taetigkeitstypen(id, name, has_subtaetigkeiten),
+  baustelle:baustellen(id, bezeichnung, plz, ort),
+  sub_taetigkeit:sub_taetigkeiten(id, name)
+`
+
 export const zeiterfassungService = {
   async getActiveEntry(userId) {
     const { data, error } = await supabase
       .from('zeiterfassung')
-      .select(`
-        *,
-        taetigkeit:taetigkeitstypen(id, name, has_subtaetigkeiten),
-        baustelle:baustellen(id, bezeichnung, plz, ort),
-        sub_taetigkeit:sub_taetigkeiten(id, name)
-      `)
+      .select(ZEITERFASSUNG_SELECT)
       .eq('user_id', userId)
       .is('end_time', null)
       .is('deleted_at', null)
@@ -47,12 +49,7 @@ export const zeiterfassungService = {
     const { data, error } = await supabase
       .from('zeiterfassung')
       .insert(insertData)
-      .select(`
-        *,
-        taetigkeit:taetigkeitstypen(id, name, has_subtaetigkeiten),
-        baustelle:baustellen(id, bezeichnung, plz, ort),
-        sub_taetigkeit:sub_taetigkeiten(id, name)
-      `)
+      .select(ZEITERFASSUNG_SELECT)
       .single()
 
     if (error) throw error
@@ -94,12 +91,7 @@ export const zeiterfassungService = {
         start_time: new Date().toISOString(),
         is_break: true,
       })
-      .select(`
-        *,
-        taetigkeit:taetigkeitstypen(id, name, has_subtaetigkeiten),
-        baustelle:baustellen(id, bezeichnung, plz, ort),
-        sub_taetigkeit:sub_taetigkeiten(id, name)
-      `)
+      .select(ZEITERFASSUNG_SELECT)
       .single()
 
     if (error) throw error
@@ -116,12 +108,7 @@ export const zeiterfassungService = {
 
     const { data, error } = await supabase
       .from('zeiterfassung')
-      .select(`
-        *,
-        taetigkeit:taetigkeitstypen(id, name, has_subtaetigkeiten),
-        baustelle:baustellen(id, bezeichnung, plz, ort),
-        sub_taetigkeit:sub_taetigkeiten(id, name)
-      `)
+      .select(ZEITERFASSUNG_SELECT)
       .eq('user_id', userId)
       .is('deleted_at', null)
       .gte('start_time', today.toISOString())
@@ -140,12 +127,7 @@ export const zeiterfassungService = {
         updated_at: new Date().toISOString(),
       })
       .eq('id', entryId)
-      .select(`
-        *,
-        taetigkeit:taetigkeitstypen(id, name, has_subtaetigkeiten),
-        baustelle:baustellen(id, bezeichnung, plz, ort),
-        sub_taetigkeit:sub_taetigkeiten(id, name)
-      `)
+      .select(ZEITERFASSUNG_SELECT)
       .single()
 
     if (error) throw error

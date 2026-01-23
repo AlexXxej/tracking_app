@@ -13,15 +13,4 @@ export const subTaetigkeitenService = {
     if (error) throw error
     return data || []
   },
-
-  async getById(id) {
-    const { data, error } = await supabase
-      .from('sub_taetigkeiten')
-      .select('*')
-      .eq('id', id)
-      .single()
-
-    if (error) throw error
-    return data
-  },
 }

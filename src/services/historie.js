@@ -1,8 +1,15 @@
 import { supabase } from './supabase'
+import { formatMinutesCompact } from '../utils/formatters'
 
 const PAGE_SIZE = 5
 
 const WEEKDAYS = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag']
+
+const HISTORIE_SELECT = `
+  *,
+  taetigkeit:taetigkeitstypen(id, name),
+  baustelle:baustellen(id, bezeichnung, oberbegriff, plz, ort)
+`
 
 export const historieService = {
   pageSize: PAGE_SIZE,
@@ -44,11 +51,7 @@ export const historieService = {
 
     const { data, error } = await supabase
       .from('zeiterfassung')
-      .select(`
-        *,
-        taetigkeit:taetigkeitstypen(id, name),
-        baustelle:baustellen(id, bezeichnung, oberbegriff, plz, ort)
-      `)
+      .select(HISTORIE_SELECT)
       .eq('user_id', userId)
       .is('deleted_at', null)
       .gte('start_time', from.toISOString())
@@ -104,11 +107,7 @@ export const historieService = {
     }
   },
 
-  formatMinutes(minutes) {
-    const h = Math.floor(minutes / 60)
-    const m = minutes % 60
-    return `${h}:${m.toString().padStart(2, '0')}`
-  },
+  formatMinutes: formatMinutesCompact,
 
   // Hole paginierte Tages-Übersicht
   async getDaySummaries(userId, fromDate, toDate, page = 1) {
@@ -147,11 +146,7 @@ export const historieService = {
 
     const { data, error } = await supabase
       .from('zeiterfassung')
-      .select(`
-        *,
-        taetigkeit:taetigkeitstypen(id, name),
-        baustelle:baustellen(id, bezeichnung, oberbegriff, plz, ort)
-      `)
+      .select(HISTORIE_SELECT)
       .eq('user_id', userId)
       .is('deleted_at', null)
       .gte('start_time', from.toISOString())

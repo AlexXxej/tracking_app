@@ -1,4 +1,5 @@
 import { supabase } from './supabase'
+import { formatMinutesReadable } from '../utils/formatters'
 
 export const tagesberichtService = {
   async getTodayReport(userId) {
@@ -31,13 +32,7 @@ export const tagesberichtService = {
     return parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10)
   },
 
-  // Minuten -> "2h 15min" oder "45min"
-  formatMinutes(minutes) {
-    const h = Math.floor(minutes / 60)
-    const m = minutes % 60
-    if (h > 0) return `${h}h ${m}min`
-    return `${m}min`
-  },
+  formatMinutes: formatMinutesReadable,
 
   // -> "Freitag, 17. Januar 2026"
   formatDatumLang(date) {

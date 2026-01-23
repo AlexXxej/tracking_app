@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { baustellenService } from '../../services/baustellen'
+import { Pagination } from '../baustellen/BaustellenList'
 
 export function BaustellenSearch({ onSelect }) {
   const [query, setQuery] = useState('')
@@ -112,37 +113,11 @@ export function BaustellenSearch({ onSelect }) {
         )}
       </div>
 
-      {totalPages > 1 && (
-        <div className="flex items-center justify-center gap-2">
-          <button
-            onClick={() => goToPage(currentPage - 1)}
-            disabled={currentPage === 1}
-            className="px-3 py-1 rounded border border-[var(--color-border)] text-[var(--color-text-secondary)] disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[var(--color-bg-tertiary)]"
-          >
-            &lt;
-          </button>
-          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-            <button
-              key={page}
-              onClick={() => goToPage(page)}
-              className={`px-3 py-1 rounded border ${
-                page === currentPage
-                  ? 'border-[var(--color-accent)] bg-[var(--color-accent)] text-black'
-                  : 'border-[var(--color-border)] text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-tertiary)]'
-              }`}
-            >
-              {page}
-            </button>
-          ))}
-          <button
-            onClick={() => goToPage(currentPage + 1)}
-            disabled={currentPage === totalPages}
-            className="px-3 py-1 rounded border border-[var(--color-border)] text-[var(--color-text-secondary)] disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[var(--color-bg-tertiary)]"
-          >
-            &gt;
-          </button>
-        </div>
-      )}
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={goToPage}
+      />
 
       {query.length < 2 && (
         <p className="text-center text-sm text-[var(--color-text-tertiary)]">

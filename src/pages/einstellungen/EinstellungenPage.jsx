@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { DatePicker } from '../../components/ui/DatePicker'
 import { Button } from '../../components/ui/Button'
+import { AlertMessage } from '../../components/ui/AlertMessage'
 import { webhookService } from '../../services/webhook'
 import { tagesstatusService } from '../../services/tagesstatus'
 import { useAuth } from '../../hooks/useAuth'
@@ -124,17 +125,8 @@ export function EinstellungenPage() {
           {exportLoading ? 'Wird exportiert...' : 'Tracking-Daten exportieren'}
         </Button>
 
-        {exportError && (
-          <div className="rounded-lg border border-[var(--color-error)] bg-[var(--color-bg-secondary)] p-4">
-            <p className="text-sm text-[var(--color-error)]">{exportError}</p>
-          </div>
-        )}
-
-        {exportMessage && (
-          <div className="rounded-lg border border-green-500 bg-[var(--color-bg-secondary)] p-4">
-            <p className="text-sm text-green-500">{exportMessage}</p>
-          </div>
-        )}
+        <AlertMessage type="error" message={exportError} />
+        <AlertMessage type="success" message={exportMessage} />
       </div>
 
       {/* Sektion 2: Baustellendaten synchronisieren */}
@@ -151,17 +143,8 @@ export function EinstellungenPage() {
           {syncLoading ? 'Wird synchronisiert...' : 'Baustellendaten synchronisieren'}
         </Button>
 
-        {syncError && (
-          <div className="rounded-lg border border-[var(--color-error)] bg-[var(--color-bg-secondary)] p-4">
-            <p className="text-sm text-[var(--color-error)]">{syncError}</p>
-          </div>
-        )}
-
-        {syncMessage && (
-          <div className="rounded-lg border border-green-500 bg-[var(--color-bg-secondary)] p-4">
-            <p className="text-sm text-green-500">{syncMessage}</p>
-          </div>
-        )}
+        <AlertMessage type="error" message={syncError} />
+        <AlertMessage type="success" message={syncMessage} />
       </div>
 
       {/* Sektion 3: Status festlegen */}
