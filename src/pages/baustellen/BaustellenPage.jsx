@@ -137,19 +137,19 @@ export function BaustellenPage() {
 
   // Listen-Ansicht
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col">
       {canEdit && (
-        <div className="flex justify-end">
+        <div className="flex justify-end mt-6">
           <button
             onClick={() => setShowCreateDialog(true)}
-            className="w-[140px] rounded-lg bg-[var(--color-accent)] py-3 text-white font-medium hover:bg-[var(--color-accent-hover)] transition-colors text-sm"
+            className="w-[140px] h-[46px] rounded-lg bg-[var(--color-accent)] text-white font-medium hover:bg-[var(--color-accent-hover)] transition-colors text-sm"
           >
             + Neue Baustelle
           </button>
         </div>
       )}
 
-      <div className="flex gap-2">
+      <div className={`flex gap-2 ${canEdit ? 'mt-2' : 'mt-4'}`}>
         <input
           type="text"
           value={query}
@@ -160,7 +160,7 @@ export function BaustellenPage() {
         <select
           value={filterColumn}
           onChange={(e) => setFilterColumn(e.target.value)}
-          className="w-[140px] rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-secondary)] px-3 py-3 text-[var(--color-text-primary)] focus:border-[var(--color-accent)] focus:outline-none"
+          className="w-[140px] h-[46px] rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-secondary)] px-3 text-[var(--color-text-primary)] focus:border-[var(--color-accent)] focus:outline-none"
         >
           {baustellenService.searchableColumns.map((col) => (
             <option key={col.value} value={col.value}>
@@ -171,10 +171,10 @@ export function BaustellenPage() {
       </div>
 
       {error && (
-        <p className="text-sm text-[var(--color-error)]">{error}</p>
+        <p className="mt-4 text-sm text-[var(--color-error)]">{error}</p>
       )}
 
-      <div className="max-h-[60vh] overflow-auto">
+      <div className="mt-4 max-h-[60vh] overflow-auto">
         <BaustellenList
           baustellen={baustellen}
           onSelect={handleSelect}
@@ -182,11 +182,13 @@ export function BaustellenPage() {
         />
       </div>
 
-      <Pagination
-        currentPage={currentPage}
-        totalPages={totalPages}
-        onPageChange={loadBaustellen}
-      />
+      <div className="mt-4">
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={loadBaustellen}
+        />
+      </div>
 
       <BaustellenCreateDialog
         isOpen={showCreateDialog}

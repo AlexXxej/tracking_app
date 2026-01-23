@@ -120,7 +120,7 @@ export function BaustellenDetail({ baustelle, canEdit, onUpdate, onArchive, onCl
           onChange={(e) => handleFieldChange(field.key, e.target.value)}
           disabled={!canEdit}
           rows={3}
-          className={`w-full rounded-lg border bg-[var(--color-bg-primary)] px-3 py-2 text-[var(--color-text-primary)] focus:border-[var(--color-accent)] focus:outline-none resize-none ${
+          className={`w-full rounded-lg border bg-[var(--color-bg-primary)] px-4 py-2 text-[var(--color-text-primary)] focus:border-[var(--color-accent)] focus:outline-none resize-none ${
             isEdited ? 'border-[var(--color-accent)]' : 'border-[var(--color-border)]'
           } ${!canEdit ? 'opacity-70' : ''}`}
         />
@@ -133,7 +133,7 @@ export function BaustellenDetail({ baustelle, canEdit, onUpdate, onArchive, onCl
         value={value}
         onChange={(e) => handleFieldChange(field.key, e.target.value)}
         disabled={!canEdit}
-        className={`w-full rounded-lg border bg-[var(--color-bg-primary)] px-3 py-2 text-[var(--color-text-primary)] focus:border-[var(--color-accent)] focus:outline-none ${
+        className={`w-full rounded-lg border bg-[var(--color-bg-primary)] px-4 py-2 text-[var(--color-text-primary)] focus:border-[var(--color-accent)] focus:outline-none ${
           isEdited ? 'border-[var(--color-accent)]' : 'border-[var(--color-border)]'
         } ${!canEdit ? 'opacity-70' : ''}`}
       />

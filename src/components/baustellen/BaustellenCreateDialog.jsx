@@ -53,7 +53,10 @@ const INITIAL_FORM_DATA = {
 
 export function BaustellenCreateDialog({ isOpen, onClose, onCreated }) {
   const [step, setStep] = useState('form') // 'form' | 'confirm'
-  const [formData, setFormData] = useState(INITIAL_FORM_DATA)
+  const [formData, setFormData] = useState(() => ({
+    ...INITIAL_FORM_DATA,
+    datum: new Date().toISOString().split('T')[0]
+  }))
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState(null)
   const { showToast } = useToast()
@@ -96,7 +99,10 @@ export function BaustellenCreateDialog({ isOpen, onClose, onCreated }) {
   }
 
   const handleClose = () => {
-    setFormData(INITIAL_FORM_DATA)
+    setFormData({
+      ...INITIAL_FORM_DATA,
+      datum: new Date().toISOString().split('T')[0]
+    })
     setStep('form')
     setError(null)
     onClose()
@@ -111,7 +117,7 @@ export function BaustellenCreateDialog({ isOpen, onClose, onCreated }) {
           value={value}
           onChange={(e) => handleFieldChange(field.key, e.target.value)}
           rows={3}
-          className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-primary)] px-3 py-2 text-[var(--color-text-primary)] focus:border-[var(--color-accent)] focus:outline-none resize-none"
+          className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-primary)] px-4 py-2 text-[var(--color-text-primary)] focus:border-[var(--color-accent)] focus:outline-none resize-none"
         />
       )
     }
@@ -121,14 +127,14 @@ export function BaustellenCreateDialog({ isOpen, onClose, onCreated }) {
         type={field.type === 'date' ? 'date' : 'text'}
         value={value}
         onChange={(e) => handleFieldChange(field.key, e.target.value)}
-        className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-primary)] px-3 py-2 text-[var(--color-text-primary)] focus:border-[var(--color-accent)] focus:outline-none"
+        className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-primary)] px-4 py-2 text-[var(--color-text-primary)] focus:border-[var(--color-accent)] focus:outline-none"
       />
     )
   }
 
   return (
     <Modal isOpen={isOpen} onClose={handleClose}>
-      <div className="w-[90vw] max-w-[500px] max-h-[85vh] rounded-2xl bg-[var(--color-bg-secondary)] border border-[var(--color-border)] flex flex-col">
+      <div className="w-[90vw] max-w-[500px] min-h-[500px] max-h-[85vh] rounded-2xl bg-[var(--color-bg-secondary)] border border-[var(--color-border)] flex flex-col">
         {/* Header */}
         <div className="p-6 border-b border-[var(--color-border)]">
           <h2 className="text-xl font-semibold text-[var(--color-text-primary)]">
