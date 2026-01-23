@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../../hooks/useAuth'
 import { zeiterfassungService } from '../../services/zeiterfassung'
-import { historieService } from '../../services/historie'
 import { taetigkeitstypenService } from '../../services/taetigkeitstypen'
 import { formatTimeForInput, combineDateAndTime } from '../../utils/formatters'
 import { BaustellenPicker } from '../common/BaustellenPicker'
@@ -90,7 +89,13 @@ export function EntryEditModal({ entry, onClose, onSave, onDelete }) {
         </h2>
 
         <div className="mb-4 text-sm text-[var(--color-text-tertiary)]">
-          {historieService.getWeekday(entry.start_time)} {historieService.formatDate(entry.start_time)}
+          {new Date(entry.start_time).toLocaleDateString('de-DE', {
+            weekday: 'long',
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            timeZone: 'Europe/Berlin'
+          })}
         </div>
 
         {error && (
