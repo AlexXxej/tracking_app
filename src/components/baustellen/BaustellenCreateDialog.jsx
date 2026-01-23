@@ -1,13 +1,14 @@
 import { useState } from 'react'
 import { Modal } from '../ui/Modal'
 import { baustellenService } from '../../services/baustellen'
+import { useToast } from '../../hooks/useToast'
 
 const FIELD_SECTIONS = [
   {
     title: 'Identifikation',
     fields: [
-      { key: 'external_nummer', label: 'Externe Nr.' },
-      { key: 'oberbegriff', label: 'Oberbegriff' },
+      { key: 'external_nummer', label: 'Externe Nr.', required: true },
+      { key: 'oberbegriff', label: 'Oberbegriff', required: true },
       { key: 'bezeichnung', label: 'Bezeichnung' },
     ]
   },
@@ -55,6 +56,11 @@ export function BaustellenCreateDialog({ isOpen, onClose, onCreated }) {
   const [formData, setFormData] = useState(INITIAL_FORM_DATA)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState(null)
+  const { showToast } = useToast()
+
+  const isValid = () => {
+    return formData.external_nummer.trim() !== '' && formData.oberbegriff.trim() !== ''
+  }
 
   const handleFieldChange = (key, value) => {
     setFormData(prev => ({ ...prev, [key]: value }))
@@ -78,6 +84,7 @@ export function BaustellenCreateDialog({ isOpen, onClose, onCreated }) {
         Object.entries(formData).filter(([_, v]) => v !== '')
       )
       const created = await baustellenService.create(dataToSave)
+      showToast('Baustelle erstellt')
       onCreated(created)
       handleClose()
     } catch (err) {
@@ -149,6 +156,7 @@ export function BaustellenCreateDialog({ isOpen, onClose, onCreated }) {
                       <div key={field.key}>
                         <label className="block text-sm text-[var(--color-text-secondary)] mb-1">
                           {field.label}
+                          {field.required && <span className="text-[var(--color-error)] ml-1">*</span>}
                         </label>
                         {renderField(field)}
                       </div>
@@ -192,7 +200,8 @@ export function BaustellenCreateDialog({ isOpen, onClose, onCreated }) {
               </button>
               <button
                 onClick={handleNext}
-                className="flex-1 rounded-full bg-[var(--color-accent)] py-3 text-white font-medium hover:bg-[var(--color-accent-hover)] transition-colors"
+                disabled={!isValid()}
+                className="flex-1 rounded-full bg-[var(--color-accent)] py-3 text-white font-medium hover:bg-[var(--color-accent-hover)] disabled:opacity-50 transition-colors"
               >
                 Weiter
               </button>

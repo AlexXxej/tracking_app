@@ -95,10 +95,13 @@ export function BaustellenPage() {
   }
 
   const handleUpdate = async (id, updates) => {
-    const updated = await baustellenService.update(id, updates)
-    setDetailData(updated)
-    // Aktualisiere auch in der Liste
-    setBaustellen(prev => prev.map(b => b.id === id ? { ...b, ...updates } : b))
+    try {
+      const updated = await baustellenService.update(id, updates)
+      setDetailData(updated)
+      setBaustellen(prev => prev.map(b => b.id === id ? { ...b, ...updates } : b))
+    } catch (err) {
+      throw err
+    }
   }
 
   const handleCreated = (newBaustelle) => {
@@ -136,12 +139,14 @@ export function BaustellenPage() {
   return (
     <div className="flex flex-col gap-4">
       {canEdit && (
-        <button
-          onClick={() => setShowCreateDialog(true)}
-          className="w-full rounded-lg bg-[var(--color-accent)] py-3 text-white font-medium hover:bg-[var(--color-accent-hover)] transition-colors"
-        >
-          + Neue Baustelle
-        </button>
+        <div className="flex justify-end">
+          <button
+            onClick={() => setShowCreateDialog(true)}
+            className="w-[140px] rounded-lg bg-[var(--color-accent)] py-3 text-white font-medium hover:bg-[var(--color-accent-hover)] transition-colors text-sm"
+          >
+            + Neue Baustelle
+          </button>
+        </div>
       )}
 
       <div className="flex gap-2">
@@ -155,7 +160,7 @@ export function BaustellenPage() {
         <select
           value={filterColumn}
           onChange={(e) => setFilterColumn(e.target.value)}
-          className="rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-secondary)] px-3 py-3 text-[var(--color-text-primary)] focus:border-[var(--color-accent)] focus:outline-none"
+          className="w-[140px] rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-secondary)] px-3 py-3 text-[var(--color-text-primary)] focus:border-[var(--color-accent)] focus:outline-none"
         >
           {baustellenService.searchableColumns.map((col) => (
             <option key={col.value} value={col.value}>

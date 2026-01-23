@@ -1,13 +1,14 @@
 import { useState } from 'react'
 import { ConfirmDialog } from '../feedback/ConfirmDialog'
+import { useToast } from '../../hooks/useToast'
 
 // Feld-Definitionen mit Gruppen
 const FIELD_SECTIONS = [
   {
     title: 'Identifikation',
     fields: [
-      { key: 'external_nummer', label: 'Externe Nr.' },
-      { key: 'oberbegriff', label: 'Oberbegriff' },
+      { key: 'external_nummer', label: 'Externe Nr.', required: true },
+      { key: 'oberbegriff', label: 'Oberbegriff', required: true },
       { key: 'bezeichnung', label: 'Bezeichnung' },
     ]
   },
@@ -41,8 +42,17 @@ export function BaustellenDetail({ baustelle, canEdit, onUpdate, onArchive, onCl
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState(null)
   const [showArchiveConfirm, setShowArchiveConfirm] = useState(false)
+  const { showToast } = useToast()
 
   const hasChanges = Object.keys(editedFields).length > 0
+
+  const isValid = () => {
+    const requiredFields = ['external_nummer', 'oberbegriff']
+    return requiredFields.every(key => {
+      const value = getFieldValue(key)
+      return value && value.trim() !== ''
+    })
+  }
 
   const getFieldValue = (key) => {
     if (key in editedFields) {
@@ -75,6 +85,7 @@ export function BaustellenDetail({ baustelle, canEdit, onUpdate, onArchive, onCl
     try {
       await onUpdate(baustelle.id, editedFields)
       setEditedFields({})
+      showToast('Änderungen gespeichert')
     } catch (err) {
       setError(err.message || 'Fehler beim Speichern')
     } finally {
@@ -91,6 +102,7 @@ export function BaustellenDetail({ baustelle, canEdit, onUpdate, onArchive, onCl
     try {
       await onArchive(baustelle.id)
       setShowArchiveConfirm(false)
+      showToast('Baustelle archiviert')
     } catch (err) {
       setError(err.message || 'Fehler beim Archivieren')
       setShowArchiveConfirm(false)
@@ -142,7 +154,7 @@ export function BaustellenDetail({ baustelle, canEdit, onUpdate, onArchive, onCl
           </div>
         )}
 
-        <div className="flex flex-col gap-6 max-h-[55vh] overflow-auto pr-2">
+        <div className="flex flex-col gap-6">
           {FIELD_SECTIONS.map((section) => (
             <div key={section.title}>
               <h3 className="text-xs font-medium text-[var(--color-text-tertiary)] uppercase tracking-wide mb-3">
@@ -153,6 +165,7 @@ export function BaustellenDetail({ baustelle, canEdit, onUpdate, onArchive, onCl
                   <div key={field.key}>
                     <label className="block text-sm text-[var(--color-text-secondary)] mb-1">
                       {field.label}
+                      {field.required && <span className="text-[var(--color-error)] ml-1">*</span>}
                     </label>
                     {renderField(field)}
                   </div>
@@ -162,14 +175,36 @@ export function BaustellenDetail({ baustelle, canEdit, onUpdate, onArchive, onCl
           ))}
         </div>
 
-        {/* Archivieren Button */}
+        {/* Button-Reihe */}
         {canEdit && (
-          <button
-            onClick={() => setShowArchiveConfirm(true)}
-            className="mt-6 w-full rounded-lg border border-[var(--color-warning)] py-3 font-medium text-[var(--color-warning)] transition-colors hover:bg-[var(--color-warning)] hover:text-black"
-          >
-            Baustelle archivieren
-          </button>
+          <div className="flex items-center gap-3 mt-6 pt-4 border-t border-[var(--color-border)]">
+            <button
+              onClick={() => setShowArchiveConfirm(true)}
+              className="rounded-lg border border-[var(--color-warning)] px-4 py-2 text-sm font-medium text-[var(--color-warning)] transition-colors hover:bg-[var(--color-warning)] hover:text-black"
+            >
+              Archivieren
+            </button>
+
+            <div className="flex-1" />
+
+            {hasChanges && (
+              <>
+                <button
+                  onClick={handleCancel}
+                  className="rounded-lg bg-[var(--color-cancel)] px-6 py-3 text-[var(--color-text-primary)] font-medium hover:bg-[var(--color-cancel-hover)] transition-colors"
+                >
+                  Abbrechen
+                </button>
+                <button
+                  onClick={handleSaveAll}
+                  disabled={saving || !isValid()}
+                  className="rounded-lg bg-[var(--color-confirm)] px-8 py-3 text-black font-medium hover:bg-[var(--color-confirm-hover)] disabled:opacity-50 transition-colors"
+                >
+                  {saving ? 'Speichern...' : 'Speichern'}
+                </button>
+              </>
+            )}
+          </div>
         )}
       </div>
 
@@ -182,25 +217,6 @@ export function BaustellenDetail({ baustelle, canEdit, onUpdate, onArchive, onCl
         confirmText="Archivieren"
         cancelText="Abbrechen"
       />
-
-      {/* Fixierter Speichern-Button */}
-      {hasChanges && (
-        <div className="fixed bottom-6 right-6 z-10 flex gap-2">
-          <button
-            onClick={handleCancel}
-            className="rounded-full bg-[var(--color-cancel)] px-5 py-3 text-[var(--color-text-primary)] font-medium shadow-lg hover:bg-[var(--color-cancel-hover)] transition-colors"
-          >
-            Abbrechen
-          </button>
-          <button
-            onClick={handleSaveAll}
-            disabled={saving}
-            className="rounded-full bg-[var(--color-confirm)] px-6 py-3 text-black font-medium shadow-lg hover:bg-[var(--color-confirm-hover)] disabled:opacity-50 transition-colors"
-          >
-            {saving ? 'Speichern...' : 'Speichern'}
-          </button>
-        </div>
-      )}
     </div>
   )
 }
