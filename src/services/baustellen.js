@@ -27,6 +27,7 @@ export const baustellenService = {
     let queryBuilder = supabase
       .from('baustellen')
       .select('id, external_nummer, bezeichnung, auftraggeber, ansprechpartner, zustaendig, oberbegriff, plz, ort, status, datum', { count: 'exact' })
+      .eq('active', true)
 
     if (filter.columns.length === 1) {
       queryBuilder = queryBuilder.ilike(filter.columns[0], searchTerm)
@@ -51,6 +52,7 @@ export const baustellenService = {
     const { data, error, count } = await supabase
       .from('baustellen')
       .select('id, external_nummer, bezeichnung, auftraggeber, ansprechpartner, zustaendig, oberbegriff, plz, ort, status, datum', { count: 'exact' })
+      .eq('active', true)
       .order('datum', { ascending: false, nullsFirst: false })
       .range(offset, offset + PAGE_SIZE - 1)
 
@@ -76,8 +78,31 @@ export const baustellenService = {
       .from('baustellen')
       .update({
         ...updates,
-        local_modified_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
       })
+      .eq('id', id)
+      .select()
+      .single()
+
+    if (error) throw error
+    return data
+  },
+
+  async create(baustelleData) {
+    const { data, error } = await supabase
+      .from('baustellen')
+      .insert({ ...baustelleData, active: true })
+      .select()
+      .single()
+
+    if (error) throw error
+    return data
+  },
+
+  async archive(id) {
+    const { data, error } = await supabase
+      .from('baustellen')
+      .update({ active: false, updated_at: new Date().toISOString() })
       .eq('id', id)
       .select()
       .single()

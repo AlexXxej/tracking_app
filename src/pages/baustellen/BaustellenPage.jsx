@@ -5,6 +5,7 @@ import { supabase } from '../../services/supabase'
 import { baustellenService } from '../../services/baustellen'
 import { BaustellenList, Pagination } from '../../components/baustellen/BaustellenList'
 import { BaustellenDetail } from '../../components/baustellen/BaustellenDetail'
+import { BaustellenCreateDialog } from '../../components/baustellen/BaustellenCreateDialog'
 
 export function BaustellenPage() {
   const { user } = useAuth()
@@ -24,6 +25,9 @@ export function BaustellenPage() {
   const [selectedBaustelle, setSelectedBaustelle] = useState(null)
   const [detailData, setDetailData] = useState(null)
   const [canEdit, setCanEdit] = useState(false)
+
+  // Create-Dialog
+  const [showCreateDialog, setShowCreateDialog] = useState(false)
 
   // Lade User-Berechtigung
   useEffect(() => {
@@ -97,6 +101,19 @@ export function BaustellenPage() {
     setBaustellen(prev => prev.map(b => b.id === id ? { ...b, ...updates } : b))
   }
 
+  const handleCreated = (newBaustelle) => {
+    setBaustellen(prev => [newBaustelle, ...prev])
+    setShowCreateDialog(false)
+  }
+
+  const handleArchive = async (id) => {
+    await baustellenService.archive(id)
+    // Entferne aus Liste und schließe Detail
+    setBaustellen(prev => prev.filter(b => b.id !== id))
+    setSelectedBaustelle(null)
+    setDetailData(null)
+  }
+
   // Detail-Ansicht
   if (selectedBaustelle && detailData) {
     return (
@@ -105,6 +122,7 @@ export function BaustellenPage() {
           baustelle={detailData}
           canEdit={canEdit}
           onUpdate={handleUpdate}
+          onArchive={handleArchive}
           onClose={() => {
             setSelectedBaustelle(null)
             setDetailData(null)
@@ -117,6 +135,15 @@ export function BaustellenPage() {
   // Listen-Ansicht
   return (
     <div className="flex flex-col gap-4">
+      {canEdit && (
+        <button
+          onClick={() => setShowCreateDialog(true)}
+          className="w-full rounded-lg bg-[var(--color-accent)] py-3 text-white font-medium hover:bg-[var(--color-accent-hover)] transition-colors"
+        >
+          + Neue Baustelle
+        </button>
+      )}
+
       <div className="flex gap-2">
         <input
           type="text"
@@ -154,6 +181,12 @@ export function BaustellenPage() {
         currentPage={currentPage}
         totalPages={totalPages}
         onPageChange={loadBaustellen}
+      />
+
+      <BaustellenCreateDialog
+        isOpen={showCreateDialog}
+        onClose={() => setShowCreateDialog(false)}
+        onCreated={handleCreated}
       />
     </div>
   )

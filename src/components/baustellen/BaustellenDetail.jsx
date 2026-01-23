@@ -1,89 +1,206 @@
 import { useState } from 'react'
-import { baustellenService } from '../../services/baustellen'
+import { ConfirmDialog } from '../feedback/ConfirmDialog'
 
-export function BaustellenDetail({ baustelle, canEdit, onUpdate, onClose }) {
-  const [editingField, setEditingField] = useState(null)
-  const [editValue, setEditValue] = useState('')
+// Feld-Definitionen mit Gruppen
+const FIELD_SECTIONS = [
+  {
+    title: 'Identifikation',
+    fields: [
+      { key: 'external_nummer', label: 'Externe Nr.' },
+      { key: 'oberbegriff', label: 'Oberbegriff' },
+      { key: 'bezeichnung', label: 'Bezeichnung' },
+    ]
+  },
+  {
+    title: 'Kontakt',
+    fields: [
+      { key: 'auftraggeber', label: 'Auftraggeber' },
+      { key: 'ansprechpartner', label: 'Ansprechpartner' },
+      { key: 'zustaendig', label: 'Zuständig' },
+    ]
+  },
+  {
+    title: 'Details',
+    fields: [
+      { key: 'status', label: 'Status' },
+      { key: 'datum', label: 'Datum', type: 'date' },
+      { key: 'projektbemerkung', label: 'Bemerkung', type: 'textarea' },
+    ]
+  },
+  {
+    title: 'Adresse',
+    fields: [
+      { key: 'plz', label: 'PLZ' },
+      { key: 'ort', label: 'Ort' },
+    ]
+  },
+]
+
+export function BaustellenDetail({ baustelle, canEdit, onUpdate, onArchive, onClose }) {
+  const [editedFields, setEditedFields] = useState({})
   const [saving, setSaving] = useState(false)
+  const [error, setError] = useState(null)
+  const [showArchiveConfirm, setShowArchiveConfirm] = useState(false)
 
-  const handleFieldClick = (field) => {
-    if (!canEdit) return
-    setEditingField(field.key)
-    setEditValue(baustelle[field.key] || '')
+  const hasChanges = Object.keys(editedFields).length > 0
+
+  const getFieldValue = (key) => {
+    if (key in editedFields) {
+      return editedFields[key]
+    }
+    return baustelle[key] || ''
   }
 
-  const handleSave = async () => {
-    if (!editingField) return
+  const handleFieldChange = (key, value) => {
+    if (!canEdit) return
+    setError(null)
+
+    // Wenn der Wert wieder dem Original entspricht, entferne aus editedFields
+    if (value === (baustelle[key] || '')) {
+      setEditedFields(prev => {
+        const next = { ...prev }
+        delete next[key]
+        return next
+      })
+    } else {
+      setEditedFields(prev => ({ ...prev, [key]: value }))
+    }
+  }
+
+  const handleSaveAll = async () => {
+    if (!hasChanges) return
 
     setSaving(true)
+    setError(null)
     try {
-      await onUpdate(baustelle.id, { [editingField]: editValue })
-      setEditingField(null)
+      await onUpdate(baustelle.id, editedFields)
+      setEditedFields({})
     } catch (err) {
-      console.error('Fehler beim Speichern:', err)
+      setError(err.message || 'Fehler beim Speichern')
     } finally {
       setSaving(false)
     }
   }
 
   const handleCancel = () => {
-    setEditingField(null)
-    setEditValue('')
+    setEditedFields({})
+    setError(null)
+  }
+
+  const handleArchive = async () => {
+    try {
+      await onArchive(baustelle.id)
+      setShowArchiveConfirm(false)
+    } catch (err) {
+      setError(err.message || 'Fehler beim Archivieren')
+      setShowArchiveConfirm(false)
+    }
+  }
+
+  const renderField = (field) => {
+    const value = getFieldValue(field.key)
+    const isEdited = field.key in editedFields
+
+    if (field.type === 'textarea') {
+      return (
+        <textarea
+          value={value}
+          onChange={(e) => handleFieldChange(field.key, e.target.value)}
+          disabled={!canEdit}
+          rows={3}
+          className={`w-full rounded-lg border bg-[var(--color-bg-primary)] px-3 py-2 text-[var(--color-text-primary)] focus:border-[var(--color-accent)] focus:outline-none resize-none ${
+            isEdited ? 'border-[var(--color-accent)]' : 'border-[var(--color-border)]'
+          } ${!canEdit ? 'opacity-70' : ''}`}
+        />
+      )
+    }
+
+    return (
+      <input
+        type={field.type === 'date' ? 'date' : 'text'}
+        value={value}
+        onChange={(e) => handleFieldChange(field.key, e.target.value)}
+        disabled={!canEdit}
+        className={`w-full rounded-lg border bg-[var(--color-bg-primary)] px-3 py-2 text-[var(--color-text-primary)] focus:border-[var(--color-accent)] focus:outline-none ${
+          isEdited ? 'border-[var(--color-accent)]' : 'border-[var(--color-border)]'
+        } ${!canEdit ? 'opacity-70' : ''}`}
+      />
+    )
   }
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-[var(--color-text-primary)]">
+      {/* Card Container */}
+      <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg-secondary)] p-6 shadow-xl">
+        <h2 className="text-lg font-semibold text-[var(--color-text-primary)] mb-4">
           Baustelle Details
         </h2>
+
+        {error && (
+          <div className="rounded-lg border border-[var(--color-error)] bg-[var(--color-bg-primary)] p-3 mb-4">
+            <p className="text-sm text-[var(--color-error)]">{error}</p>
+          </div>
+        )}
+
+        <div className="flex flex-col gap-6 max-h-[55vh] overflow-auto pr-2">
+          {FIELD_SECTIONS.map((section) => (
+            <div key={section.title}>
+              <h3 className="text-xs font-medium text-[var(--color-text-tertiary)] uppercase tracking-wide mb-3">
+                {section.title}
+              </h3>
+              <div className="flex flex-col gap-3">
+                {section.fields.map((field) => (
+                  <div key={field.key}>
+                    <label className="block text-sm text-[var(--color-text-secondary)] mb-1">
+                      {field.label}
+                    </label>
+                    {renderField(field)}
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Archivieren Button */}
+        {canEdit && (
+          <button
+            onClick={() => setShowArchiveConfirm(true)}
+            className="mt-6 w-full rounded-lg border border-[var(--color-warning)] py-3 font-medium text-[var(--color-warning)] transition-colors hover:bg-[var(--color-warning)] hover:text-black"
+          >
+            Baustelle archivieren
+          </button>
+        )}
       </div>
 
-      <div className="flex flex-col gap-2 max-h-[60vh] overflow-auto">
-        {baustellenService.displayFields.map((field) => (
-          <div
-            key={field.key}
-            onClick={() => handleFieldClick(field)}
-            className={`rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-secondary)] p-3 ${
-              canEdit ? 'cursor-pointer hover:border-[var(--color-accent)]' : ''
-            }`}
+      {/* Archivieren Bestätigung */}
+      <ConfirmDialog
+        isOpen={showArchiveConfirm}
+        onClose={() => setShowArchiveConfirm(false)}
+        onConfirm={handleArchive}
+        title="Baustelle archivieren?"
+        confirmText="Archivieren"
+        cancelText="Abbrechen"
+      />
+
+      {/* Fixierter Speichern-Button */}
+      {hasChanges && (
+        <div className="fixed bottom-6 right-6 z-10 flex gap-2">
+          <button
+            onClick={handleCancel}
+            className="rounded-full bg-[var(--color-cancel)] px-5 py-3 text-[var(--color-text-primary)] font-medium shadow-lg hover:bg-[var(--color-cancel-hover)] transition-colors"
           >
-            <div className="text-xs text-[var(--color-text-tertiary)] mb-1">
-              {field.label}
-            </div>
-            {editingField === field.key ? (
-              <div className="flex flex-col gap-2">
-                <input
-                  type={field.key === 'datum' ? 'date' : 'text'}
-                  value={editValue}
-                  onChange={(e) => setEditValue(e.target.value)}
-                  className="w-full rounded border border-[var(--color-border)] bg-[var(--color-bg-primary)] px-2 py-1 text-[var(--color-text-primary)] focus:border-[var(--color-accent)] focus:outline-none"
-                  autoFocus
-                />
-                <div className="flex gap-2">
-                  <button
-                    onClick={handleSave}
-                    disabled={saving}
-                    className="flex-1 rounded bg-[var(--color-confirm)] py-1 text-black text-sm font-medium disabled:opacity-50"
-                  >
-                    {saving ? 'Speichern...' : 'Speichern'}
-                  </button>
-                  <button
-                    onClick={handleCancel}
-                    className="flex-1 rounded bg-[var(--color-cancel)] py-1 text-[var(--color-text-primary)] text-sm font-medium"
-                  >
-                    Abbrechen
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div className="text-[var(--color-text-primary)]">
-                {baustelle[field.key] || '-'}
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
+            Abbrechen
+          </button>
+          <button
+            onClick={handleSaveAll}
+            disabled={saving}
+            className="rounded-full bg-[var(--color-confirm)] px-6 py-3 text-black font-medium shadow-lg hover:bg-[var(--color-confirm-hover)] disabled:opacity-50 transition-colors"
+          >
+            {saving ? 'Speichern...' : 'Speichern'}
+          </button>
+        </div>
+      )}
     </div>
   )
 }
