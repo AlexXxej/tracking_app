@@ -5,6 +5,7 @@ import { historieService } from '../../services/historie'
 import { Pagination } from '../../components/baustellen/BaustellenList'
 import { EntryEditModal } from '../../components/historie/EntryEditModal'
 import { ManualEntryModal } from '../../components/historie/ManualEntryModal'
+import { formatTimeLocal } from '../../utils/formatters'
 
 function getDefaultDates() {
   const to = new Date()
@@ -76,8 +77,8 @@ function DayDetail({ date, entries, onEntryClick }) {
                   </div>
                   <div className="text-right text-sm">
                     <div className="text-[var(--color-text-secondary)]">
-                      {start.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}
-                      {end && ` - ${end.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}`}
+                      {formatTimeLocal(entry.start_time)}
+                      {end && ` - ${formatTimeLocal(entry.end_time)}`}
                     </div>
                     {duration !== null && (
                       <div className="text-[var(--color-text-tertiary)]">

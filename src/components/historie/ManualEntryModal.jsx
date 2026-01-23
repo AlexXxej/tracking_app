@@ -2,21 +2,13 @@ import { useState, useEffect } from 'react'
 import { useAuth } from '../../hooks/useAuth'
 import { zeiterfassungService } from '../../services/zeiterfassung'
 import { taetigkeitstypenService } from '../../services/taetigkeitstypen'
-import { baustellenService } from '../../services/baustellen'
-
-function combineDateAndTime(dateStr, timeString) {
-  if (!timeString) return null
-  const date = new Date(dateStr + 'T00:00:00')
-  const [hours, minutes] = timeString.split(':').map(Number)
-  date.setHours(hours, minutes, 0, 0)
-  return date.toISOString()
-}
+import { combineDateAndTime } from '../../utils/formatters'
+import { BaustellenPicker } from '../common/BaustellenPicker'
 
 export function ManualEntryModal({ date, onClose, onSave }) {
   const { user } = useAuth()
 
   const [taetigkeiten, setTaetigkeiten] = useState([])
-  const [baustellen, setBaustellen] = useState([])
   const [loadingData, setLoadingData] = useState(true)
 
   const [selectedTaetigkeit, setSelectedTaetigkeit] = useState('')
@@ -34,12 +26,8 @@ export function ManualEntryModal({ date, onClose, onSave }) {
       if (!user?.id) return
 
       try {
-        const [taetigkeitenData, baustellenData] = await Promise.all([
-          taetigkeitstypenService.getByUser(user.id),
-          baustellenService.getLatest(1)
-        ])
+        const taetigkeitenData = await taetigkeitstypenService.getByUser(user.id)
         setTaetigkeiten(taetigkeitenData)
-        setBaustellen(baustellenData.data)
       } catch (err) {
         setError(err.message)
       } finally {
@@ -77,11 +65,13 @@ export function ManualEntryModal({ date, onClose, onSave }) {
     }
   }
 
-  const formattedDate = new Date(date + 'T00:00:00').toLocaleDateString('de-DE', {
+  const dateObj = date instanceof Date ? date : new Date(date)
+  const formattedDate = dateObj.toLocaleDateString('de-DE', {
     weekday: 'long',
     day: '2-digit',
     month: '2-digit',
-    year: 'numeric'
+    year: 'numeric',
+    timeZone: 'Europe/Berlin'
   })
 
   return (
@@ -125,18 +115,11 @@ export function ManualEntryModal({ date, onClose, onSave }) {
               <label className="mb-1 block text-xs text-[var(--color-text-tertiary)]">
                 Baustelle
               </label>
-              <select
+              <BaustellenPicker
                 value={selectedBaustelle}
-                onChange={(e) => setSelectedBaustelle(e.target.value)}
-                className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-tertiary)] px-3 py-2 text-[var(--color-text-primary)] focus:border-[var(--color-accent)] focus:outline-none"
-              >
-                <option value="">Keine</option>
-                {baustellen.map((b) => (
-                  <option key={b.id} value={b.id}>
-                    {b.oberbegriff} - {b.bezeichnung}
-                  </option>
-                ))}
-              </select>
+                onChange={setSelectedBaustelle}
+                placeholder="Keine"
+              />
             </div>
 
             <div className="flex gap-4">

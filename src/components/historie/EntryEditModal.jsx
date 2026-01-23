@@ -3,23 +3,8 @@ import { useAuth } from '../../hooks/useAuth'
 import { zeiterfassungService } from '../../services/zeiterfassung'
 import { historieService } from '../../services/historie'
 import { taetigkeitstypenService } from '../../services/taetigkeitstypen'
-import { baustellenService } from '../../services/baustellen'
-
-function formatTimeForInput(isoString) {
-  if (!isoString) return ''
-  const d = new Date(isoString)
-  const hours = String(d.getHours()).padStart(2, '0')
-  const minutes = String(d.getMinutes()).padStart(2, '0')
-  return `${hours}:${minutes}`
-}
-
-function combineDateAndTime(dateIso, timeString) {
-  if (!timeString) return null
-  const date = new Date(dateIso)
-  const [hours, minutes] = timeString.split(':').map(Number)
-  date.setHours(hours, minutes, 0, 0)
-  return date.toISOString()
-}
+import { formatTimeForInput, combineDateAndTime } from '../../utils/formatters'
+import { BaustellenPicker } from '../common/BaustellenPicker'
 
 export function EntryEditModal({ entry, onClose, onSave, onDelete }) {
   const { user } = useAuth()
@@ -33,7 +18,6 @@ export function EntryEditModal({ entry, onClose, onSave, onDelete }) {
 
   // Neue Felder
   const [taetigkeiten, setTaetigkeiten] = useState([])
-  const [baustellen, setBaustellen] = useState([])
   const [selectedTaetigkeit, setSelectedTaetigkeit] = useState(entry.taetigkeit?.id || '')
   const [selectedBaustelle, setSelectedBaustelle] = useState(entry.baustelle?.id || '')
   const [personalStatus, setPersonalStatus] = useState(entry.personal_status || 'arbeit')
@@ -44,12 +28,8 @@ export function EntryEditModal({ entry, onClose, onSave, onDelete }) {
       if (!user?.id) return
 
       try {
-        const [taetigkeitenData, baustellenData] = await Promise.all([
-          taetigkeitstypenService.getByUser(user.id),
-          baustellenService.getLatest(1)
-        ])
+        const taetigkeitenData = await taetigkeitstypenService.getByUser(user.id)
         setTaetigkeiten(taetigkeitenData)
-        setBaustellen(baustellenData.data)
       } catch (err) {
         setError(err.message)
       } finally {
@@ -109,12 +89,6 @@ export function EntryEditModal({ entry, onClose, onSave, onDelete }) {
           {taetigkeitName} bearbeiten
         </h2>
 
-        {entry.baustelle && (
-          <div className="mb-4 text-sm text-[var(--color-text-secondary)]">
-            {entry.baustelle.oberbegriff} - {entry.baustelle.bezeichnung}
-          </div>
-        )}
-
         <div className="mb-4 text-sm text-[var(--color-text-tertiary)]">
           {historieService.getWeekday(entry.start_time)} {historieService.formatDate(entry.start_time)}
         </div>
@@ -171,18 +145,11 @@ export function EntryEditModal({ entry, onClose, onSave, onDelete }) {
                 <label className="mb-1 block text-xs text-[var(--color-text-tertiary)]">
                   Baustelle
                 </label>
-                <select
+                <BaustellenPicker
                   value={selectedBaustelle}
-                  onChange={(e) => setSelectedBaustelle(e.target.value)}
-                  className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-tertiary)] px-3 py-2 text-[var(--color-text-primary)] focus:border-[var(--color-accent)] focus:outline-none"
-                >
-                  <option value="">Keine</option>
-                  {baustellen.map((b) => (
-                    <option key={b.id} value={b.id}>
-                      {b.oberbegriff} - {b.bezeichnung}
-                    </option>
-                  ))}
-                </select>
+                  onChange={setSelectedBaustelle}
+                  placeholder="Keine"
+                />
               </div>
 
               <div>
