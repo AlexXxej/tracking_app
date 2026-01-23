@@ -1,5 +1,13 @@
 @import "tailwindcss";
 
+@layer base {
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+}
+
 :root {
   --spacing-horizontal: 5%;
   --color-bg-primary: #0f0f0f;
@@ -18,12 +26,6 @@
   --color-confirm-hover: #c4914a;
   --color-cancel: #3a3a3a;
   --color-cancel-hover: #4a4a4a;
-}
-
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
 }
 
 html,
