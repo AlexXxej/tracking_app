@@ -82,14 +82,27 @@ export const zeiterfassungService = {
   async startBreak(userId, currentEntryId, pauseTaetigkeitId) {
     await this.endEntry(currentEntryId)
 
+    // Aktuellen Tagesstatus abfragen (wie in startEntry)
+    const now = new Date().toISOString()
+    const { data: statusData } = await supabase
+      .from('tagesstatus')
+      .select('status')
+      .eq('user_id', userId)
+      .lte('valid_from', now)
+      .or(`valid_to.is.null,valid_to.gte.${now}`)
+      .order('valid_to', { ascending: true, nullsFirst: false })
+      .limit(1)
+      .maybeSingle()
+
     const { data, error } = await supabase
       .from('zeiterfassung')
       .insert({
         user_id: userId,
         taetigkeit_id: pauseTaetigkeitId,
         baustelle_id: null,
-        start_time: new Date().toISOString(),
+        start_time: now,
         is_break: true,
+        personal_status: statusData?.status || 'arbeit',
       })
       .select(ZEITERFASSUNG_SELECT)
       .single()
