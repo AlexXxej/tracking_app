@@ -2,9 +2,7 @@ import { useState } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 import { Menu } from '../components/navigation/Menu'
 import { MenuIcon } from '../components/navigation/MenuIcon'
-import { NewsIcon } from '../components/navigation/NewsIcon'
 import { BackButton } from '../components/navigation/BackButton'
-import { NotificationsPanel } from '../components/navigation/NotificationsPanel'
 import { useSubNavigation } from '../hooks/useSubNavigation'
 import { ROUTES, MENU_ITEMS } from '../utils/constants'
 
@@ -24,30 +22,12 @@ function getPageTitle(pathname) {
 
 export function AppLayout() {
   const [menuOpen, setMenuOpen] = useState(false)
-  const [notificationsOpen, setNotificationsOpen] = useState(false)
   const location = useLocation()
   const { canGoBack } = useSubNavigation()
 
   const isMainPage = location.pathname === ROUTES.MAIN
   const showBackButton = !isMainPage || canGoBack
   const pageTitle = getPageTitle(location.pathname)
-
-  const handleNotificationsClick = () => {
-    if (notificationsOpen) {
-      // Toggle: schließen wenn bereits offen
-      setNotificationsOpen(false)
-    } else {
-      // Öffnen und Menü schließen
-      setMenuOpen(false)
-      setNotificationsOpen(true)
-    }
-  }
-
-  const handleMenuClick = () => {
-    // Notifications schließen und Menü öffnen
-    setNotificationsOpen(false)
-    setMenuOpen(true)
-  }
 
   return (
     <div className="flex h-full flex-col">
@@ -60,9 +40,8 @@ export function AppLayout() {
           {pageTitle}
         </h1>
 
-        <div className="flex w-24 items-center justify-end gap-1">
-          <NewsIcon hasNews={false} onClick={handleNotificationsClick} />
-          <MenuIcon onClick={handleMenuClick} />
+        <div className="flex w-24 items-center justify-end">
+          <MenuIcon onClick={() => setMenuOpen(true)} />
         </div>
       </header>
 
@@ -71,7 +50,6 @@ export function AppLayout() {
       </main>
 
       <Menu isOpen={menuOpen} onClose={() => setMenuOpen(false)} />
-      <NotificationsPanel isOpen={notificationsOpen} onClose={() => setNotificationsOpen(false)} />
     </div>
   )
 }

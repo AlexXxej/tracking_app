@@ -39,17 +39,13 @@ export function StatusPage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <h3 className="text-lg font-medium text-[var(--color-text-primary)]">
-        Status festlegen
-      </h3>
-
-      <StatusForm userId={user?.id} onSave={handleStatusSave} />
-
       <StatusList
         entries={statusEntries}
         onDelete={handleStatusDelete}
         loading={statusLoading}
       />
+
+      <StatusForm userId={user?.id} onSave={handleStatusSave} />
     </div>
   )
 }

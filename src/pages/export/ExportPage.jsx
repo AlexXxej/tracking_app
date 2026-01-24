@@ -32,10 +32,6 @@ export function ExportPage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <h3 className="text-lg font-medium text-[var(--color-text-primary)]">
-        Tracking-Daten exportieren
-      </h3>
-
       <DatePicker
         label="Startdatum"
         value={startDate}
