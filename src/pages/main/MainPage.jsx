@@ -74,6 +74,11 @@ export function MainPage() {
   }
 
   const handleTaetigkeitSelect = async (taetigkeit) => {
+    if (taetigkeit.isPauseOption) {
+      await startPause()
+      return
+    }
+
     setSelectedTaetigkeit(taetigkeit)
 
     // Schritt 1: Prüfe ob Baustelle benötigt
