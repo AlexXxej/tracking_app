@@ -9,7 +9,8 @@ import { MainPage } from '../pages/main/MainPage'
 import { TagesberichtPage } from '../pages/tagesbericht/TagesberichtPage'
 import { BaustellenPage } from '../pages/baustellen/BaustellenPage'
 import { HistoriePage } from '../pages/historie/HistoriePage'
-import { EinstellungenPage } from '../pages/einstellungen/EinstellungenPage'
+import { ExportPage } from '../pages/export/ExportPage'
+import { StatusPage } from '../pages/status/StatusPage'
 import { ROUTES } from '../utils/constants'
 
 export const router = createBrowserRouter([
@@ -32,7 +33,8 @@ export const router = createBrowserRouter([
       { path: ROUTES.TAGESBERICHT, element: <TagesberichtPage /> },
       { path: ROUTES.BAUSTELLEN, element: <BaustellenPage /> },
       { path: ROUTES.HISTORIE, element: <HistoriePage /> },
-      { path: ROUTES.EINSTELLUNGEN, element: <EinstellungenPage /> },
+      { path: ROUTES.EXPORT, element: <ExportPage /> },
+      { path: ROUTES.STATUS, element: <StatusPage /> },
     ],
   },
 ])

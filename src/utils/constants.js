@@ -6,14 +6,16 @@ export const ROUTES = {
   TAGESBERICHT: '/tagesbericht',
   BAUSTELLEN: '/baustellen',
   HISTORIE: '/historie',
-  EINSTELLUNGEN: '/einstellungen',
+  EXPORT: '/export',
+  STATUS: '/status',
 }
 
 export const MENU_ITEMS = [
-  { label: 'Tagesbericht', path: ROUTES.TAGESBERICHT },
+  { label: 'Mein Tag', path: ROUTES.TAGESBERICHT },
+  { label: 'Stundenzettel', path: ROUTES.HISTORIE },
   { label: 'Baustellen', path: ROUTES.BAUSTELLEN },
-  { label: 'Historie', path: ROUTES.HISTORIE },
-  { label: 'Einstellungen', path: ROUTES.EINSTELLUNGEN },
+  { label: 'Stunden exportieren', path: ROUTES.EXPORT },
+  { label: 'Krank-/Urlaubszeiten', path: ROUTES.STATUS },
 ]
 
 // Ebenen-basierte Navigation: Gibt den Parent-Pfad zurück
