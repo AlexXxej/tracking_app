@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react'
-import { baustellenService } from '../../services/baustellen'
 
 function formatDuration(startTime) {
   const start = new Date(startTime)
@@ -29,7 +28,6 @@ export function ActiveTracking({ entry, onPause, onEnd, isBreak }) {
   if (!entry) return null
 
   const taetigkeitName = isBreak ? 'Pause' : entry.taetigkeit?.name || 'Tätigkeit'
-  const address = entry.baustelle ? baustellenService.formatAddress(entry.baustelle) : null
 
   return (
     <div className="flex flex-col gap-6">
@@ -37,14 +35,19 @@ export function ActiveTracking({ entry, onPause, onEnd, isBreak }) {
         <h2 className="text-2xl font-bold text-[var(--color-text-primary)]">
           {taetigkeitName}
         </h2>
-        {address && (
+        {entry.baustelle?.oberbegriff && (
           <p className="mt-1 text-[var(--color-text-secondary)]">
-            {address}
+            {entry.baustelle.oberbegriff}
           </p>
         )}
         {entry.baustelle?.bezeichnung && (
           <p className="text-sm text-[var(--color-text-tertiary)]">
             {entry.baustelle.bezeichnung}
+          </p>
+        )}
+        {entry.baustelle?.external_nummer && (
+          <p className="text-sm text-[var(--color-text-tertiary)]">
+            {entry.baustelle.external_nummer}
           </p>
         )}
       </div>
