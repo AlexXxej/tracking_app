@@ -102,16 +102,16 @@ export function MainPage() {
   const handleBaustelleSelect = async (baustelle) => {
     if (!selectedTaetigkeit) return
 
-    setShowBaustellenSearch(false)
-
     // Prüfe ob Subtätigkeiten benötigt
     if (selectedTaetigkeit.has_subtaetigkeiten) {
       setSelectedBaustelle(baustelle)
       await loadSubTaetigkeiten(selectedTaetigkeit.id)
+      setShowBaustellenSearch(false)
       return
     }
 
     // Direkt starten
+    setShowBaustellenSearch(false)
     await startTaetigkeit(selectedTaetigkeit.id, baustelle.id)
     setSelectedTaetigkeit(null)
   }

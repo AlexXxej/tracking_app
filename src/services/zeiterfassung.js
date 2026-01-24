@@ -3,7 +3,7 @@ import { supabase } from './supabase'
 const ZEITERFASSUNG_SELECT = `
   *,
   taetigkeit:taetigkeitstypen(id, name, has_subtaetigkeiten),
-  baustelle:baustellen(id, bezeichnung, plz, ort),
+  baustelle:baustellen(id, external_nummer, oberbegriff, bezeichnung, plz, ort),
   sub_taetigkeit:sub_taetigkeiten(id, name)
 `
 
