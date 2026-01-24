@@ -11,7 +11,8 @@ export function StatusDialog({ isOpen, onClose, onSelect }) {
 
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
-      <div className="flex flex-col gap-4">
+      <div className="mx-4 w-full max-w-md rounded-lg bg-[var(--color-bg-secondary)] p-6">
+        <div className="flex flex-col gap-4">
         <h2 className="text-lg font-semibold text-[var(--color-text-primary)]">
           Status wählen
         </h2>
@@ -35,6 +36,7 @@ export function StatusDialog({ isOpen, onClose, onSelect }) {
         >
           Abbrechen
         </button>
+        </div>
       </div>
     </Modal>
   )

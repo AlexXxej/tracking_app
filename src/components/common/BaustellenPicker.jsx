@@ -117,8 +117,11 @@ export function BaustellenPicker({ value, onChange, placeholder = 'Keine' }) {
                 onChange={(e) => setFilterColumn(e.target.value)}
                 className="rounded border border-[var(--color-border)] bg-[var(--color-bg-tertiary)] px-2 py-1 text-xs text-[var(--color-text-primary)]"
               >
-                <option value="oberbegriff">Oberbegriff</option>
-                <option value="bezeichnung">Bezeichnung</option>
+                {baustellenService.searchableColumns.map((col) => (
+                  <option key={col.value} value={col.value}>
+                    {col.label}
+                  </option>
+                ))}
               </select>
             </div>
           </div>
