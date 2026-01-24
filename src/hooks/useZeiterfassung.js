@@ -88,6 +88,30 @@ export function useZeiterfassung() {
     }
   }, [user?.id, activeEntry?.id, taetigkeitstypen])
 
+  const startStandalonePause = useCallback(async () => {
+    if (!user?.id) return
+
+    const pauseTyp = taetigkeitstypen.find(t => t.name.toLowerCase() === 'pause')
+    if (!pauseTyp) {
+      setError('Kein Pause-Tätigkeitstyp gefunden')
+      return
+    }
+
+    setError(null)
+    try {
+      const entry = await zeiterfassungService.startEntry({
+        userId: user.id,
+        taetigkeitId: pauseTyp.id,
+        isBreak: true,
+      })
+      setActiveEntry(entry)
+      return entry
+    } catch (err) {
+      setError(err.message)
+      throw err
+    }
+  }, [user?.id, taetigkeitstypen])
+
   const endPause = useCallback(async () => {
     if (!activeEntry?.id) return
 
@@ -112,6 +136,7 @@ export function useZeiterfassung() {
     startTaetigkeit,
     endTaetigkeit,
     startPause,
+    startStandalonePause,
     endPause,
     isBreakActive,
     isBaustelleTaetigkeit,

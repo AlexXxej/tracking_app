@@ -21,6 +21,7 @@ export function MainPage() {
     startTaetigkeit,
     endTaetigkeit,
     startPause,
+    startStandalonePause,
     endPause,
     isBreakActive,
     isBaustelleTaetigkeit,
@@ -75,7 +76,7 @@ export function MainPage() {
 
   const handleTaetigkeitSelect = async (taetigkeit) => {
     if (taetigkeit.isPauseOption) {
-      await startPause()
+      await startStandalonePause()
       return
     }
 
