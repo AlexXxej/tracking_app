@@ -7,7 +7,8 @@ const PAUSE_ITEM = {
 }
 
 export function TaetigkeitSelect({ taetigkeitstypen, onSelect, loading }) {
-  const itemsWithPause = [...taetigkeitstypen, PAUSE_ITEM]
+  const filteredTypen = taetigkeitstypen.filter(t => t.name.toLowerCase() !== 'pause')
+  const itemsWithPause = [...filteredTypen, PAUSE_ITEM]
 
   return (
     <SelectList
