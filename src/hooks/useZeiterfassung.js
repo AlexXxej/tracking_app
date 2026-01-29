@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useAuth } from './useAuth'
 import { zeiterfassungService } from '../services/zeiterfassung'
 import { taetigkeitstypenService } from '../services/taetigkeitstypen'
@@ -9,6 +9,7 @@ export function useZeiterfassung() {
   const [taetigkeitstypen, setTaetigkeitstypen] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const previousActivityRef = useRef(null)
 
   const loadData = useCallback(async () => {
     if (!user?.id) return
@@ -77,16 +78,24 @@ export function useZeiterfassung() {
       return
     }
 
+    // Vorherigen Tätigkeitskontext speichern für Resume nach Pause
+    previousActivityRef.current = {
+      taetigkeitId: activeEntry.taetigkeit_id,
+      baustelleId: activeEntry.baustelle_id || null,
+      subTaetigkeitId: activeEntry.sub_taetigkeit_id || null,
+    }
+
     setError(null)
     try {
       const breakEntry = await zeiterfassungService.startBreak(user.id, activeEntry.id, pauseTyp.id)
       setActiveEntry(breakEntry)
       return breakEntry
     } catch (err) {
+      previousActivityRef.current = null
       setError(err.message)
       throw err
     }
-  }, [user?.id, activeEntry?.id, taetigkeitstypen])
+  }, [user?.id, activeEntry?.id, activeEntry?.taetigkeit_id, activeEntry?.baustelle_id, activeEntry?.sub_taetigkeit_id, taetigkeitstypen])
 
   const startStandalonePause = useCallback(async () => {
     if (!user?.id) return
@@ -118,12 +127,32 @@ export function useZeiterfassung() {
     setError(null)
     try {
       await zeiterfassungService.endBreak(activeEntry.id)
-      setActiveEntry(null)
+
+      const prevContext = previousActivityRef.current
+      previousActivityRef.current = null
+
+      if (prevContext) {
+        // Vorherige Tätigkeit automatisch fortsetzen
+        try {
+          const entry = await zeiterfassungService.startEntry({
+            userId: user.id,
+            taetigkeitId: prevContext.taetigkeitId,
+            baustelleId: prevContext.baustelleId,
+            subTaetigkeitId: prevContext.subTaetigkeitId,
+          })
+          setActiveEntry(entry)
+        } catch (restartErr) {
+          console.error('Fehler beim Fortsetzen der Tätigkeit:', restartErr)
+          setActiveEntry(null)
+        }
+      } else {
+        setActiveEntry(null)
+      }
     } catch (err) {
       setError(err.message)
       throw err
     }
-  }, [activeEntry?.id])
+  }, [activeEntry?.id, user?.id])
 
   const isBreakActive = activeEntry?.is_break === true
   const isBaustelleTaetigkeit = activeEntry?.taetigkeit?.name?.toLowerCase() === 'baustelle'
