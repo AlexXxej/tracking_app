@@ -1,28 +1,30 @@
-const WEBHOOK_URL = import.meta.env.VITE_WEBHOOK_AKTION_URL
+import { supabase } from './supabase'
 
 export const webhookService = {
   async triggerAktion(startDate, endDate) {
-    if (!WEBHOOK_URL) {
-      throw new Error('Webhook URL nicht konfiguriert')
-    }
-
-    const response = await fetch(WEBHOOK_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
+    const { data, error } = await supabase.functions.invoke('trigger-export', {
+      body: {
         start_date: startDate,
         end_date: endDate,
         triggered_at: new Date().toISOString(),
-      }),
+      },
     })
 
-    if (!response.ok) {
-      const errorText = await response.text()
-      throw new Error(`Webhook Fehler: ${response.status} - ${errorText}`)
+    if (error) {
+      // HTTP-Fehler: Status + Body beibehalten (wie bisher)
+      if (error.context instanceof Response) {
+        let errorText
+        try {
+          errorText = await error.context.text()
+        } catch {
+          errorText = error.message
+        }
+        throw new Error(`Webhook Fehler: ${error.context.status} - ${errorText}`)
+      }
+      // Netzwerk-/Relay-Fehler
+      throw new Error(`Webhook Fehler: ${error.message}`)
     }
 
-    return await response.json()
+    return data
   },
 }
